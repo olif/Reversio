@@ -10,11 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Domain", "src\Bothello.Domain\Reversio.Domain.xproj", "{B5DA2B6F-8E2E-4EE3-AB5F-50AC57142D13}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9DD46016-6D52-49A7-9AA8-5517A85C1213}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Domain.UnitTest", "test\Bothello.Domain.UnitTest\Reversio.Domain.UnitTest.xproj", "{98DE6BEF-A267-433B-8427-EF6B82BE6A37}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Domain", "src\Reversio.Domain\Reversio.Domain.xproj", "{B5DA2B6F-8E2E-4EE3-AB5F-50AC57142D13}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Domain.UnitTest", "test\Reversio.Domain.UnitTest\Reversio.Domain.UnitTest.xproj", "{98DE6BEF-A267-433B-8427-EF6B82BE6A37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

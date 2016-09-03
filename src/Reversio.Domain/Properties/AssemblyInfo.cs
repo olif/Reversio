@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Bothello.Domain")]
+[assembly: AssemblyProduct("Reversio.Domain")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: InternalsVisibleTo("Bothello.Domain.UnitTest")]
+[assembly: InternalsVisibleTo("Reversio.Domain.UnitTest")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
