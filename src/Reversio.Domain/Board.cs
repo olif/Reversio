@@ -13,6 +13,7 @@ namespace Reversio.Domain
 
         private static readonly int[,] Directions = new int[8, 2]
         {
+            //X  Y
             {0, -1},    // Up
             {1, -1},    // Up-right
             {1, 0},     // Right
@@ -20,21 +21,22 @@ namespace Reversio.Domain
             {0, 1},     // Down
             {-1, 1},    // Down left
             {-1, 0},    // Left
-            {-1, 1}     // Up-left
+            {-1, -1}    // Up-left
         };
 
         public Board()
         {
             _positions = new int[Width, Height]
-            {
-                { 0, 0, 0, 0, 0, 0, 0, 0},
-                { 0, 0, 0, 0, 0, 0, 0, 0},
-                { 0, 0, 0, 0, 0, 0, 0, 0},
-                { 0, 0, 0, 1, -1, 0, 0, 0},
-                { 0, 0, 0, -1, 1, 0, 0, 0},
-                { 0, 0, 0, 0, 0, 0, 0, 0},
-                { 0, 0, 0, 0, 0, 0, 0, 0},
-                { 0, 0, 0, 0, 0, 0, 0, 0},
+            {    
+                //0  1  2  3  4  5  6  7
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //1
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //2
+                { 0, 0, 0, 1, -1, 0, 0, 0}, //3
+                { 0, 0, 0, -1, 1, 0, 0, 0}, //4
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //5
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
+                { 0, 0, 0, 0, 0, 0, 0, 0},  //7
             };
         }
 
@@ -47,7 +49,6 @@ namespace Reversio.Domain
         {
             var x = move.Position.X;
             var y = move.Position.Y;
-            var color = move.Color;
             var piecesToFlip = GetPiecesToFlipForMove(move);
             if (piecesToFlip.Any())
             {
@@ -93,7 +94,7 @@ namespace Reversio.Domain
                 for (var j = 0; j < Height; j++)
                 {
                     xPos += xStep;
-                    yPos += yStep;
+                    yPos -= yStep;
                     var position = new Position(xPos, yPos);
 
                     // Out of board
@@ -104,7 +105,7 @@ namespace Reversio.Domain
                     }
 
                     // Our own color
-                    if (_positions[xPos, yPos] == (int) move.Color)
+                    if (_positions[yPos, xPos] == (int) move.Color)
                     {
                         break;
                     }
@@ -140,7 +141,7 @@ namespace Reversio.Domain
 
         private bool IsPositionEmpty(Position position)
         {
-            return _positions[position.X, position.Y] == 0;
+            return _positions[position.Y, position.X] == 0;
         }
 
         private static bool IsPositionOnBoard(Position position)
@@ -172,14 +173,18 @@ namespace Reversio.Domain
         {
             var charArr = Translate(_positions);
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", Width)) + " |");
             for (int i = 0; i < charArr.GetLength(0); i++)
             {
+                sb.Append("| ");
                 for (int j = 0; j < charArr.GetLength(1); j++)
                 {
-                    sb.Append(charArr[i, j]);
+                    sb.Append($" {charArr[i, j]} ");
                 }
+                sb.Append(" |");
                 sb.Append("\r\n");
             }
+            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", Width)) + " |");
 
             return sb.ToString();
         }
@@ -194,7 +199,7 @@ namespace Reversio.Domain
                     switch (intArr[i, j])
                     {
                         case 0:
-                            charArr[i, j] = '-';
+                            charArr[i, j] = ' ';
                             break;
                         case -1:
                             charArr[i, j] = 'X';

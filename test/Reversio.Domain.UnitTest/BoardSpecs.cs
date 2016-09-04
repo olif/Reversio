@@ -119,6 +119,46 @@ namespace Reversio.Domain.UnitTest
             hasMoves.Should().BeFalse();
         }
 
+        [Fact]
+        public void Test()
+        {
+            var board = new Board(DefaultPositions);
+            var move1 = new Move(3, 2, Disc.Dark);
+            var move2 = new Move(2, 4, Disc.Light);
+            var move3 = new Move(3, 5, Disc.Dark);
+            var move4 = new Move(4, 2, Disc.Light);
+            var move5 = new Move(5, 2, Disc.Dark);
+
+            board.Place(move1);
+            board.Place(move2);
+            board.Place(move3);
+            board.Place(move4);
+            board.Place(move5);
+
+            var expectedBoard = new Board(new char[8, 8]
+            {
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', 'X', 'X', 'X', ' ', ' '},
+
+                {' ', ' ', ' ', 'O', 'X', ' ', ' ', ' '},
+
+                {' ', ' ', 'O', 'X', 'O', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', 'X', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            }.Translate());
+
+            Debug.WriteLine(board);
+            board.Should().Be(expectedBoard);
+        }
+
+
         private static int[,] DefaultPositions
         {
             get
