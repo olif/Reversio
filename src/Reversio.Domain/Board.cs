@@ -1,28 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Reversio.Domain
 {
     public class Board
     {
+        public const int Width = 8;
+        public const int Height = 8;
         private readonly int[,] _positions;
 
-        private readonly int[,] _directions = new int[8, 2]
+        private static readonly int[,] Directions = new int[8, 2]
         {
-            {0, -1}, // Up
-            {1, -1}, // Up-right
-            {1, 0}, // Right
-            {1, -1}, // Down right
-            {0, 1}, // Down
-            {-1, 1}, // Down left
-            {-1, 0}, // Left
-            {-1, 1} // Up-left
+            {0, -1},    // Up
+            {1, -1},    // Up-right
+            {1, 0},     // Right
+            {1, -1},    // Down right
+            {0, 1},     // Down
+            {-1, 1},    // Down left
+            {-1, 0},    // Left
+            {-1, 1}     // Up-left
         };
 
         public Board()
         {
-            _positions = new int[8, 8];
+            _positions = new int[Width, Height]
+            {
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+                { 0, 0, 0, 1, -1, 0, 0, 0},
+                { 0, 0, 0, -1, 1, 0, 0, 0},
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+                { 0, 0, 0, 0, 0, 0, 0, 0},
+            };
         }
 
         internal Board(int[,] positions)
@@ -30,60 +43,76 @@ namespace Reversio.Domain
             _positions = positions;
         }
 
-        public void Place(Move disc)
+        public bool Place(Move move)
         {
-            var x = disc.Position.X;
-            var y = disc.Position.Y;
-            var color = disc.Color;
-            var piecesToFlip = PiecesToFlip(x, y, color);
-            if (piecesToFlip.Count > 0)
+            var x = move.Position.X;
+            var y = move.Position.Y;
+            var color = move.Color;
+            var piecesToFlip = GetPiecesToFlipForMove(move);
+            if (piecesToFlip.Any())
             {
-                _positions[y, x] = (int)disc.Color;
+                _positions[y, x] = (int)move.Color;
                 FlipDiscs(piecesToFlip);
+                return true;
             }
+
+            return false;
         }
 
-        private void FlipDiscs(IEnumerable<Position> piecesToFlip)
+        private void FlipDiscs(IEnumerable<Position> positionsToFlipw)
         {
-            foreach (var position in piecesToFlip)
+            foreach (var position in positionsToFlipw)
             {
                 _positions[position.Y, position.X] *= -1;
             }
         }
 
-        private IList<Position> PiecesToFlip(int x, int y, Disc color)
+        private bool IsMoveValid(Move move)
+        {
+            var piecesToFlip = GetPiecesToFlipForMove(move);
+            return piecesToFlip.Any();
+        }
+
+        private IEnumerable<Position> GetPiecesToFlipForMove(Move move)
         {
             List<Position> positionsToFlipInMove = new List<Position>();
-            for (var i = 0; i < 8; i++)
-            {
-                int xPos = x;
-                int yPos = y;
-                int xStep = _directions[i, 0];
-                int yStep = _directions[i, 1];
-                var positionsToFlipInDirection = new Position[8];
 
-                for (var j = 0; j < 8; j++)
+            if (!IsPositionEmpty(move.Position))
+            {
+                return positionsToFlipInMove;
+            }
+
+            for (var i = 0; i < Width; i++)
+            {
+                int xPos = move.Position.X;
+                int yPos = move.Position.Y;
+                int xStep = Directions[i, 0];
+                int yStep = Directions[i, 1];
+                var positionsToFlipInDirection = new Position[Height];
+
+                for (var j = 0; j < Height; j++)
                 {
                     xPos += xStep;
                     yPos += yStep;
+                    var position = new Position(xPos, yPos);
 
                     // Out of board
-                    if (!IsOnBoard(xPos, yPos) || IsEmpty(xPos, yPos))
+                    if (!IsPositionOnBoard(position) || IsPositionEmpty(position))
                     {
-                        positionsToFlipInDirection = new Position[8];
+                        positionsToFlipInDirection = new Position[Height];
                         break;
                     }
 
                     // Our own color
-                    if (_positions[xPos, yPos] == (int) color)
+                    if (_positions[xPos, yPos] == (int) move.Color)
                     {
                         break;
                     }
 
-                    positionsToFlipInDirection[j] = new Position(xPos, yPos);
+                    positionsToFlipInDirection[j] = position;
                 }
 
-                for (int j = 0; j < 8; j++)
+                for (int j = 0; j < Height; j++)
                 {
                     if (positionsToFlipInDirection[j] != null)
                     {
@@ -95,29 +124,48 @@ namespace Reversio.Domain
             return positionsToFlipInMove;
         }
 
-        private bool IsEmpty(int xPos, int yPos)
+        public bool HasMoves(Disc disc)
         {
-            return _positions[xPos, yPos] == 0;
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (IsMoveValid(new Move(i, j, disc)))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
-        private static bool IsOnBoard(int xPos, int yPos)
+        private bool IsPositionEmpty(Position position)
         {
-            return xPos >= 0 && xPos < 8 && yPos >= 0 && yPos < 8;
+            return _positions[position.X, position.Y] == 0;
+        }
+
+        private static bool IsPositionOnBoard(Position position)
+        {
+            return position.X >= 0 && position.X < Width && position.Y >= 0 && position.Y < Height;
         }
 
         public override bool Equals(object obj)
         {
             var thatBoard = obj as Board;
             if (thatBoard == null) return false;
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < Width; i++)
             {
-                for (int j = 0; j < 8; j++)
+                for (int j = 0; j < Height; j++)
                 {
                     if (_positions[i, j] != thatBoard._positions[i, j]) return false;
                 }
             }
 
             return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return _positions.GetHashCode();
         }
 
         public override string ToString()
