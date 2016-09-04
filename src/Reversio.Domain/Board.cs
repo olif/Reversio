@@ -10,7 +10,7 @@ namespace Reversio.Domain
         public const int Width = 8;
         public const int Height = 8;
         private readonly int[,] _positions;
-        public Disc ColorOfNextMode { get; private set; }
+        public Disc DiscOfNextMove { get; private set; }
 
         private static readonly int[,] Directions = new int[8, 2]
         {
@@ -45,17 +45,19 @@ namespace Reversio.Domain
         internal Board(int[,] positions)
         {
             _positions = positions;
-            ColorOfNextMode = Disc.Dark;
+            DiscOfNextMove = Disc.Dark;
         }
 
         public bool TryDoMove(Move move)
         {
-            if (move.Color != ColorOfNextMode)
+            var moveValid = false;
+            if (move.Color == DiscOfNextMove)
             {
-                return false;
+                var piecesToFlip = GetPiecesToFlipForMove(move);
+                moveValid = UpdateState(move, piecesToFlip);
             }
-            var piecesToFlip = GetPiecesToFlipForMove(move);
-            return UpdateState(move, piecesToFlip);
+            
+            return moveValid;
         }
 
         private bool UpdateState(Move move, IList<Position> piecesToFlip)
@@ -66,15 +68,10 @@ namespace Reversio.Domain
             {
                 _positions[y, x] = (int) move.Color;
                 FlipDiscs(piecesToFlip);
-                if (move.Color == Disc.Dark)
+                var otherDisc = ToggleCurrentDisc();
+                if (HasMoves(otherDisc))
                 {
-                    if (HasMoves(Disc.Light))
-                        ToggleColor();
-                }
-                else if (move.Color == Disc.Light)
-                {
-                    if (HasMoves(Disc.Light))
-                        ToggleColor();
+                    DiscOfNextMove = otherDisc;
                 }
                 return true;
             }
@@ -82,10 +79,15 @@ namespace Reversio.Domain
             return false;
         }
 
+        private Disc ToggleCurrentDisc()
+        {
+            return DiscOfNextMove == Disc.Dark ? Disc.Light : Disc.Dark;
+        }
+
         private void ToggleColor()
         {
-           if(ColorOfNextMode == Disc.Dark) ColorOfNextMode = Disc.Light;
-           else if (ColorOfNextMode == Disc.Light) ColorOfNextMode = Disc.Dark;
+           if(DiscOfNextMove == Disc.Dark) DiscOfNextMove = Disc.Light;
+           else if (DiscOfNextMove == Disc.Light) DiscOfNextMove = Disc.Dark;
         }
 
         private void FlipDiscs(IEnumerable<Position> positionsToFlipw)

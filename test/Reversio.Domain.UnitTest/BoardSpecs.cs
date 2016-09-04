@@ -30,7 +30,7 @@ namespace Reversio.Domain.UnitTest
             result1.Should().BeTrue();
             result2.Should().BeFalse();
             result3.Should().BeTrue();
-            board.ColorOfNextMode.Should().Be(Disc.Dark);
+            board.DiscOfNextMove.Should().Be(Disc.Dark);
         }
 
         [Fact]
