@@ -4,10 +4,13 @@
     {
         public Position Position { get; }
 
-        public Move(int x, int y, Disc color)
+        public Move(Position position, Disc color)
         {
-            Position = new Position(x, y);
+            Position = position;
             Color = color;
+        }
+        public Move(int x, int y, Disc color) : this(new Position(x, y), color)
+        {
         }
 
         public Disc Color { get; }

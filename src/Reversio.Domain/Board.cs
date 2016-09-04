@@ -10,6 +10,7 @@ namespace Reversio.Domain
         public const int Width = 8;
         public const int Height = 8;
         private readonly int[,] _positions;
+        public Disc ColorOfNextMode { get; private set; }
 
         private static readonly int[,] Directions = new int[8, 2]
         {
@@ -17,16 +18,14 @@ namespace Reversio.Domain
             {0, -1},    // Up
             {1, -1},    // Up-right
             {1, 0},     // Right
-            {1, -1},    // Down right
+            {1, 1},    // Down right
             {0, 1},     // Down
             {-1, 1},    // Down left
             {-1, 0},    // Left
             {-1, -1}    // Up-left
         };
 
-        public Board()
-        {
-            _positions = new int[Width, Height]
+        private static readonly int[,] InitialPositions = new int[Width, Height]
             {    
                 //0  1  2  3  4  5  6  7
                 { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
@@ -38,26 +37,55 @@ namespace Reversio.Domain
                 { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
                 { 0, 0, 0, 0, 0, 0, 0, 0},  //7
             };
+
+        public Board() : this(InitialPositions)
+        {
         }
 
         internal Board(int[,] positions)
         {
             _positions = positions;
+            ColorOfNextMode = Disc.Dark;
         }
 
-        public bool Place(Move move)
+        public bool TryDoMove(Move move)
+        {
+            if (move.Color != ColorOfNextMode)
+            {
+                return false;
+            }
+            var piecesToFlip = GetPiecesToFlipForMove(move);
+            return UpdateState(move, piecesToFlip);
+        }
+
+        private bool UpdateState(Move move, IList<Position> piecesToFlip)
         {
             var x = move.Position.X;
             var y = move.Position.Y;
-            var piecesToFlip = GetPiecesToFlipForMove(move);
             if (piecesToFlip.Any())
             {
-                _positions[y, x] = (int)move.Color;
+                _positions[y, x] = (int) move.Color;
                 FlipDiscs(piecesToFlip);
+                if (move.Color == Disc.Dark)
+                {
+                    if (HasMoves(Disc.Light))
+                        ToggleColor();
+                }
+                else if (move.Color == Disc.Light)
+                {
+                    if (HasMoves(Disc.Light))
+                        ToggleColor();
+                }
                 return true;
             }
 
             return false;
+        }
+
+        private void ToggleColor()
+        {
+           if(ColorOfNextMode == Disc.Dark) ColorOfNextMode = Disc.Light;
+           else if (ColorOfNextMode == Disc.Light) ColorOfNextMode = Disc.Dark;
         }
 
         private void FlipDiscs(IEnumerable<Position> positionsToFlipw)
@@ -74,7 +102,7 @@ namespace Reversio.Domain
             return piecesToFlip.Any();
         }
 
-        private IEnumerable<Position> GetPiecesToFlipForMove(Move move)
+        private IList<Position> GetPiecesToFlipForMove(Move move)
         {
             List<Position> positionsToFlipInMove = new List<Position>();
 

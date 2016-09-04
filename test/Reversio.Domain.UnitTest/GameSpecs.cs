@@ -4,8 +4,6 @@ namespace Reversio.Domain.UnitTest
 {
     public class GameSpecs
     {
-        Game target;
-
         [Fact]
         public void Can_Place_Brick()
         {
@@ -14,11 +12,8 @@ namespace Reversio.Domain.UnitTest
             var user2 = new User();
 
             game.JoinOpponent(user2);
-
             var position = new Position(1, 2);
-
-            var player = game.GetPlayer(user1);
-            player.PlacesDiscAt(position);  
+            game.MakeMove(user1, position);
         }
     }
 }

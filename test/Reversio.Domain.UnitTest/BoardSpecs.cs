@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Linq;
 using Xunit;
 using FluentAssertions;
 
@@ -10,11 +7,6 @@ namespace Reversio.Domain.UnitTest
 {
     public class BoardSpecs
     {
-        public BoardSpecs()
-        {
-      
-        }
-
         [Fact]
         public void Defaults_To_Initial_Positions()
         {
@@ -24,11 +16,29 @@ namespace Reversio.Domain.UnitTest
         }
 
         [Fact]
+        public void Cannot_Do_Multiple_Moves_Of_Same_Color()
+        {
+            var board = new Board(DefaultPositions);
+            var move1 = new Move(4, 5, Disc.Dark);
+            var move2 = new Move(2, 3, Disc.Dark);
+            var move3 = new Move(5, 3, Disc.Light);
+
+            var result1 = board.TryDoMove(move1);
+            var result2 = board.TryDoMove(move2);
+            var result3 = board.TryDoMove(move3);
+
+            result1.Should().BeTrue();
+            result2.Should().BeFalse();
+            result3.Should().BeTrue();
+            board.ColorOfNextMode.Should().Be(Disc.Dark);
+        }
+
+        [Fact]
         public void Placing_Disc_On_Valid_Position_Updates_Board_Positions()
         {
             var board = new Board(DefaultPositions);
             var move1 = new Move(4, 5, Disc.Dark);
-            var result = board.Place(move1);
+            var result = board.TryDoMove(move1);
 
             var expectedPositions = new char[8, 8]
             {
@@ -59,7 +69,7 @@ namespace Reversio.Domain.UnitTest
         {
             var board = new Board(DefaultPositions);
             var invalidMove = new Move(4, 7, Disc.Dark);
-            var moveResult =  board.Place(invalidMove);
+            var moveResult =  board.TryDoMove(invalidMove);
             moveResult.Should().BeFalse();
         }
 
@@ -120,7 +130,42 @@ namespace Reversio.Domain.UnitTest
         }
 
         [Fact]
-        public void Test()
+        public void Can_Make_Multiple_Moves_Of_Same_Color_If_Other_Color_Cannot_Move()
+        {
+            var positions = new char[8, 8]
+            {
+
+                {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+
+                {'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', 'O', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+            };
+
+            var board = new Board(positions.Translate());
+            var move1 = new Move(5, 0, Disc.Dark);
+            var move2 = new Move(5, 2, Disc.Dark);
+
+            var result1 = board.TryDoMove(move1);
+            var result2 = board.TryDoMove(move2);
+
+            Debug.WriteLine(board);
+            result1.Should().BeTrue();
+            result2.Should().BeTrue();
+        }
+
+        [Fact]
+        public void TryDoMove_()
         {
             var board = new Board(DefaultPositions);
             var move1 = new Move(3, 2, Disc.Dark);
@@ -128,12 +173,14 @@ namespace Reversio.Domain.UnitTest
             var move3 = new Move(3, 5, Disc.Dark);
             var move4 = new Move(4, 2, Disc.Light);
             var move5 = new Move(5, 2, Disc.Dark);
+            var move6 = new Move(5, 3, Disc.Light);
 
-            board.Place(move1);
-            board.Place(move2);
-            board.Place(move3);
-            board.Place(move4);
-            board.Place(move5);
+            var moveResult1 = board.TryDoMove(move1);
+            var moveResult2 = board.TryDoMove(move2);
+            var moveResult3 = board.TryDoMove(move3);
+            var moveResult4 = board.TryDoMove(move4);
+            var moveResult5 = board.TryDoMove(move5);
+            var moveResult6 = board.TryDoMove(move6);
 
             var expectedBoard = new Board(new char[8, 8]
             {
@@ -143,7 +190,7 @@ namespace Reversio.Domain.UnitTest
 
                 {' ', ' ', ' ', 'X', 'X', 'X', ' ', ' '},
 
-                {' ', ' ', ' ', 'O', 'X', ' ', ' ', ' '},
+                {' ', ' ', ' ', 'O', 'O', 'O', ' ', ' '},
 
                 {' ', ' ', 'O', 'X', 'O', ' ', ' ', ' '},
 
@@ -154,7 +201,12 @@ namespace Reversio.Domain.UnitTest
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
             }.Translate());
 
-            Debug.WriteLine(board);
+            moveResult1.Should().BeTrue();
+            moveResult2.Should().BeTrue();
+            moveResult3.Should().BeTrue();
+            moveResult4.Should().BeTrue();
+            moveResult5.Should().BeTrue();
+            moveResult6.Should().BeTrue();
             board.Should().Be(expectedBoard);
         }
 
