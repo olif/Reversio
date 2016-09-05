@@ -13,7 +13,7 @@ namespace Reversio.Domain
 
         public Game(User firstPlayer)
         {
-            _board = new Board(new int[Board.Width, Board.Height]
+            _board = new Board(new [,]
             {    
                 //0  1  2  3  4  5  6  7
                 { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
