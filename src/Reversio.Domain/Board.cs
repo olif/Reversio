@@ -7,11 +7,11 @@ namespace Reversio.Domain
 {
     public class Board
     {
-        public const int Width = 8;
-        public const int Height = 8;
+        /// <summary>
+        /// The number of columns in the board
+        /// </summary>
+        public const int EdgeSize = 8;
         private readonly int[,] _positions;
-        public Disc DiscOfNextMove { get; private set; }
-
         private static readonly int[,] Directions = new int[8, 2]
         {
             //X  Y
@@ -25,76 +25,72 @@ namespace Reversio.Domain
             {-1, -1}    // Up-left
         };
 
-        private static readonly int[,] InitialPositions = new int[Width, Height]
-            {    
-                //0  1  2  3  4  5  6  7
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //1
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //2
-                { 0, 0, 0, 1, -1, 0, 0, 0}, //3
-                { 0, 0, 0, -1, 1, 0, 0, 0}, //4
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //5
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //7
-            };
+        private static readonly int[,] InitialPositions =
+        {    
+            //0  1  2  3  4  5  6  7
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //1
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //2
+            { 0, 0, 0, 1, -1, 0, 0, 0}, //3
+            { 0, 0, 0, -1, 1, 0, 0, 0}, //4
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //5
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
+            { 0, 0, 0, 0, 0, 0, 0, 0},  //7
+        };
 
         public Board() : this(InitialPositions)
         {
         }
 
+        /// <summary>
+        /// Use internally for setting a initial state
+        /// </summary>
+        /// <param name="positions">The current board state</param>
         internal Board(int[,] positions)
         {
             _positions = positions;
-            DiscOfNextMove = Disc.Dark;
         }
 
+        /// <summary>
+        /// Tries to place a disc at a given position.
+        /// </summary>
+        /// <param name="move">The position and color of the move</param>
+        /// <returns>True if the move was valid/successfull</returns>
         public bool TryDoMove(Move move)
         {
-            var moveValid = false;
-            if (move.Color == DiscOfNextMove)
-            {
-                var piecesToFlip = GetPiecesToFlipForMove(move);
-                moveValid = UpdateState(move, piecesToFlip);
-            }
-            
-            return moveValid;
+            var piecesToFlip = GetPiecesToFlipForMove(move);
+            if (piecesToFlip.Count <= 0) return false;
+            UpdateState(move, piecesToFlip);
+            return true;
         }
 
-        private bool UpdateState(Move move, IList<Position> piecesToFlip)
+        /// <summary>
+        /// Checks if there is any valid moves for a given disc
+        /// </summary>
+        /// <param name="disc">The disc to check for</param>
+        /// <returns>True if there exists any valid moves for the disc, false otherwise</returns>
+        public bool HasMoves(Disc disc)
         {
-            var x = move.Position.X;
-            var y = move.Position.Y;
-            if (piecesToFlip.Any())
+            for (var i = 0; i < EdgeSize; i++)
             {
-                _positions[y, x] = (int) move.Color;
-                FlipDiscs(piecesToFlip);
-                var otherDisc = ToggleCurrentDisc();
-                if (HasMoves(otherDisc))
+                for (var j = 0; j < EdgeSize; j++)
                 {
-                    DiscOfNextMove = otherDisc;
+                    if (IsMoveValid(new Move(i, j, disc)))
+                        return true;
                 }
-                return true;
             }
 
             return false;
         }
 
-        private Disc ToggleCurrentDisc()
+        private void UpdateState(Move move, IList<Position> piecesToFlip)
         {
-            return DiscOfNextMove == Disc.Dark ? Disc.Light : Disc.Dark;
-        }
-
-        private void ToggleColor()
-        {
-           if(DiscOfNextMove == Disc.Dark) DiscOfNextMove = Disc.Light;
-           else if (DiscOfNextMove == Disc.Light) DiscOfNextMove = Disc.Dark;
-        }
-
-        private void FlipDiscs(IEnumerable<Position> positionsToFlipw)
-        {
-            foreach (var position in positionsToFlipw)
+            // Place the brick
+            _positions[move.Position.Y, move.Position.X] = (int) move.Color;
+            // Switch color of all bricks that we are flipping
+            foreach (var piece in piecesToFlip)
             {
-                _positions[position.Y, position.X] *= -1;
+                _positions[piece.Y, piece.X] *= -1;
             }
         }
 
@@ -106,22 +102,22 @@ namespace Reversio.Domain
 
         private IList<Position> GetPiecesToFlipForMove(Move move)
         {
-            List<Position> positionsToFlipInMove = new List<Position>();
+            var positionsToFlipInMove = new List<Position>();
 
             if (!IsPositionEmpty(move.Position))
             {
                 return positionsToFlipInMove;
             }
 
-            for (var i = 0; i < Width; i++)
+            for (var i = 0; i < EdgeSize; i++)
             {
-                int xPos = move.Position.X;
-                int yPos = move.Position.Y;
-                int xStep = Directions[i, 0];
-                int yStep = Directions[i, 1];
-                var positionsToFlipInDirection = new Position[Height];
+                var xPos = move.Position.X;
+                var yPos = move.Position.Y;
+                var xStep = Directions[i, 0];
+                var yStep = Directions[i, 1];
+                var positionsToFlipInDirection = new Position[EdgeSize];
 
-                for (var j = 0; j < Height; j++)
+                for (var j = 0; j < EdgeSize; j++)
                 {
                     xPos += xStep;
                     yPos -= yStep;
@@ -130,7 +126,7 @@ namespace Reversio.Domain
                     // Out of board
                     if (!IsPositionOnBoard(position) || IsPositionEmpty(position))
                     {
-                        positionsToFlipInDirection = new Position[Height];
+                        positionsToFlipInDirection = new Position[EdgeSize];
                         break;
                     }
 
@@ -143,7 +139,7 @@ namespace Reversio.Domain
                     positionsToFlipInDirection[j] = position;
                 }
 
-                for (int j = 0; j < Height; j++)
+                for (var j = 0; j < EdgeSize; j++)
                 {
                     if (positionsToFlipInDirection[j] != null)
                     {
@@ -155,20 +151,6 @@ namespace Reversio.Domain
             return positionsToFlipInMove;
         }
 
-        public bool HasMoves(Disc disc)
-        {
-            for (int i = 0; i < Width; i++)
-            {
-                for (int j = 0; j < Height; j++)
-                {
-                    if (IsMoveValid(new Move(i, j, disc)))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
         private bool IsPositionEmpty(Position position)
         {
             return _positions[position.Y, position.X] == 0;
@@ -176,21 +158,20 @@ namespace Reversio.Domain
 
         private static bool IsPositionOnBoard(Position position)
         {
-            return position.X >= 0 && position.X < Width && position.Y >= 0 && position.Y < Height;
+            return position.X >= 0 && position.X < EdgeSize && position.Y >= 0 && position.Y < EdgeSize;
         }
 
         public override bool Equals(object obj)
         {
             var thatBoard = obj as Board;
             if (thatBoard == null) return false;
-            for (int i = 0; i < Width; i++)
+            for (var i = 0; i < EdgeSize; i++)
             {
-                for (int j = 0; j < Height; j++)
+                for (var j = 0; j < EdgeSize; j++)
                 {
                     if (_positions[i, j] != thatBoard._positions[i, j]) return false;
                 }
             }
-
             return true;
         }
 
@@ -202,29 +183,28 @@ namespace Reversio.Domain
         public override string ToString()
         {
             var charArr = Translate(_positions);
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", Width)) + " |");
-            for (int i = 0; i < charArr.GetLength(0); i++)
+            var sb = new StringBuilder();
+            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", EdgeSize)) + " |");
+            for (var i = 0; i < charArr.GetLength(0); i++)
             {
                 sb.Append("| ");
-                for (int j = 0; j < charArr.GetLength(1); j++)
+                for (var j = 0; j < charArr.GetLength(1); j++)
                 {
                     sb.Append($" {charArr[i, j]} ");
                 }
                 sb.Append(" |");
-                sb.Append("\r\n");
+                sb.AppendLine();
             }
-            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", Width)) + " |");
-
+            sb.AppendLine("| " + string.Join("", Enumerable.Repeat("---", EdgeSize)) + " |");
             return sb.ToString();
         }
 
         public static char[,] Translate(int[,] intArr)
         {
-            char[,] charArr = new char[intArr.GetLength(0), intArr.GetLength(1)];
-            for (int i = 0; i < intArr.GetLength(0); i++)
+            var charArr = new char[intArr.GetLength(0), intArr.GetLength(1)];
+            for (var i = 0; i < intArr.GetLength(0); i++)
             {
-                for (int j = 0; j < intArr.GetLength(1); j++)
+                for (var j = 0; j < intArr.GetLength(1); j++)
                 {
                     switch (intArr[i, j])
                     {
@@ -242,7 +222,6 @@ namespace Reversio.Domain
                     }
                 }
             }
-
             return charArr;
         }
     }

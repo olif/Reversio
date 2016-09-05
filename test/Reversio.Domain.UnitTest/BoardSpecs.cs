@@ -16,24 +16,6 @@ namespace Reversio.Domain.UnitTest
         }
 
         [Fact]
-        public void Cannot_Do_Multiple_Moves_Of_Same_Color()
-        {
-            var board = new Board(DefaultPositions);
-            var move1 = new Move(4, 5, Disc.Dark);
-            var move2 = new Move(2, 3, Disc.Dark);
-            var move3 = new Move(5, 3, Disc.Light);
-
-            var result1 = board.TryDoMove(move1);
-            var result2 = board.TryDoMove(move2);
-            var result3 = board.TryDoMove(move3);
-
-            result1.Should().BeTrue();
-            result2.Should().BeFalse();
-            result3.Should().BeTrue();
-            board.DiscOfNextMove.Should().Be(Disc.Dark);
-        }
-
-        [Fact]
         public void Placing_Disc_On_Valid_Position_Updates_Board_Positions()
         {
             var board = new Board(DefaultPositions);
@@ -129,43 +111,43 @@ namespace Reversio.Domain.UnitTest
             hasMoves.Should().BeFalse();
         }
 
+        //[Fact]
+        //public void Can_Make_Multiple_Moves_Of_Same_Color_If_Other_Color_Cannot_Move()
+        //{
+        //    var positions = new char[8, 8]
+        //    {
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X'},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+
+        //        {'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', ' '},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+        //    };
+
+        //    var board = new Board(positions.Translate());
+        //    var move1 = new Move(5, 0, Disc.Dark);
+        //    var move2 = new Move(5, 2, Disc.Dark);
+
+        //    var result1 = board.TryDoMove(move1);
+        //    var result2 = board.TryDoMove(move2);
+
+        //    Debug.WriteLine(board);
+        //    result1.Should().BeTrue();
+        //    result2.Should().BeTrue();
+        //}
+
         [Fact]
-        public void Can_Make_Multiple_Moves_Of_Same_Color_If_Other_Color_Cannot_Move()
-        {
-            var positions = new char[8, 8]
-            {
-
-                {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X'},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
-
-                {'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', 'O', ' '},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-            };
-
-            var board = new Board(positions.Translate());
-            var move1 = new Move(5, 0, Disc.Dark);
-            var move2 = new Move(5, 2, Disc.Dark);
-
-            var result1 = board.TryDoMove(move1);
-            var result2 = board.TryDoMove(move2);
-
-            Debug.WriteLine(board);
-            result1.Should().BeTrue();
-            result2.Should().BeTrue();
-        }
-
-        [Fact]
-        public void TryDoMove_()
+        public void TryDoMove_Sets_The_Board_In_Correct_State()
         {
             var board = new Board(DefaultPositions);
             var move1 = new Move(3, 2, Disc.Dark);
@@ -264,7 +246,6 @@ namespace Reversio.Domain.UnitTest
                     }
                 }
             }
-
             return arr;
         }
     }

@@ -40,11 +40,9 @@ namespace Reversio.Domain
             throw new ArgumentException("Invalid argument");
         }
 
-        public bool MakeMove(User user, Position position)
+        public void UserMakesMove(User user1, Position position)
         {
-            var player = GetPlayer(user);
-            var move = new Move(position, player.Disc);
-            return _board.TryDoMove(move);
+            throw new NotImplementedException();
         }
     }
 }
