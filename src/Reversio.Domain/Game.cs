@@ -7,42 +7,70 @@ namespace Reversio.Domain
     /// </summary>
     public class Game
     {
-        private readonly Player _whitePlayer;
         private Player _blackPlayer;
-        private readonly Board _board;
+        private Player _whitePlayer;
+        private Disc _discOfNextMove;
+        public bool GameFinished = false;
+        public readonly Board Board;
 
-        public Game(User firstPlayer)
+        public Game(User firstPlayer) : this(firstPlayer, new Board())
         {
-            _board = new Board(new [,]
-            {    
-                //0  1  2  3  4  5  6  7
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //1
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //2
-                { 0, 0, 0, 1, -1, 0, 0, 0}, //3
-                { 0, 0, 0, -1, 1, 0, 0, 0}, //4
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //5
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
-                { 0, 0, 0, 0, 0, 0, 0, 0},  //7
-            });
-            _whitePlayer = new Player(firstPlayer, Disc.Dark, _board);
+        }
+
+        internal Game(User firstPlayer, Board board)
+        {
+            Board = board;
+            _blackPlayer = new Player(firstPlayer, Disc.Dark);
+            _discOfNextMove = Disc.Dark;
         }
 
         public void JoinOpponent(User joiningUser)
         {
-            _blackPlayer = new Player(joiningUser, Disc.Light, _board);
+            if(_whitePlayer != null)
+                throw new InvalidOperationException("An opponent has already joined the game");
+
+            _whitePlayer = new Player(joiningUser, Disc.Light);
         }
 
-        private Player GetPlayer(User user)
+        public bool UserMakesMove(User user, Position position)
         {
-            if (user.Id == _whitePlayer.Id) return _whitePlayer;
+            var result = false;
+            var player = GetPlayerFromUser(user);
+            if (player == null) return false;
+
+            if (player.Disc == _discOfNextMove)
+            {
+                var move = new Move(position, player.Disc);
+                result =  Board.TryDoMove(move);
+                var otherDisc = ToggleDisc(player.Disc);
+                if (Board.HasMoves(otherDisc))
+                {
+                    _discOfNextMove = otherDisc;
+                }
+                else if(Board.HasMoves(player.Disc))
+                {
+                    _discOfNextMove = player.Disc;
+                }
+                else
+                {
+                    GameFinished = true;
+                }
+            }
+
+            return result;
+        }
+
+        public Disc ToggleDisc(Disc disc)
+        {
+            if(disc == Disc.Dark) return Disc.Light;
+            return Disc.Dark;
+        }
+
+        private Player GetPlayerFromUser(User user)
+        {
             if(user.Id == _blackPlayer.Id) return _blackPlayer;
-            throw new ArgumentException("Invalid argument");
-        }
-
-        public void UserMakesMove(User user1, Position position)
-        {
-            throw new NotImplementedException();
+            if(user.Id == _whitePlayer.Id) return _whitePlayer;
+            return null;
         }
     }
 }

@@ -1,7 +1,13 @@
-﻿namespace Reversio.Domain
+﻿using System;
+
+namespace Reversio.Domain
 {
     public class User
     {
-        public object Id { get; set; }
+        public User()
+        {
+            Id = Guid.NewGuid();
+        }
+        public Guid Id { get; set; }
     }
 }

@@ -1,16 +1,17 @@
-﻿namespace Reversio.Domain
+﻿using System;
+
+namespace Reversio.Domain
 {
     public class Player
     {
-        private readonly Board _board;
         public Disc  Disc { get; }
 
-        public Player(User user, Disc disc, Board board)
+        public Player(User user, Disc disc)
         {
-            _board = board;
             Disc = disc;
+            Id = user.Id;
         }
 
-        public object Id { get; internal set; }
+        public Guid Id { get; internal set; }
     }
 }

@@ -25,8 +25,8 @@ namespace Reversio.Domain
             {-1, -1}    // Up-left
         };
 
-        private static readonly int[,] InitialPositions =
-        {    
+        public Board() : this(new[,]
+              {    
             //0  1  2  3  4  5  6  7
             { 0, 0, 0, 0, 0, 0, 0, 0},  //0  
             { 0, 0, 0, 0, 0, 0, 0, 0},  //1
@@ -36,9 +36,7 @@ namespace Reversio.Domain
             { 0, 0, 0, 0, 0, 0, 0, 0},  //5
             { 0, 0, 0, 0, 0, 0, 0, 0},  //6 
             { 0, 0, 0, 0, 0, 0, 0, 0},  //7
-        };
-
-        public Board() : this(InitialPositions)
+        })
         {
         }
 
