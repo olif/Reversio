@@ -2,9 +2,9 @@
 
 namespace Reversio.Domain
 {
-    public class User
+    public class Participant
     {
-        public User()
+        public Participant()
         {
             Id = Guid.NewGuid();
         }

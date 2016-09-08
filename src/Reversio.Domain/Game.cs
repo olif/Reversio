@@ -13,64 +13,71 @@ namespace Reversio.Domain
         public bool GameFinished = false;
         public readonly Board Board;
 
-        public Game(User firstPlayer) : this(firstPlayer, new Board())
+        public Game(Participant firstPlayer) : this(firstPlayer, new Board())
         {
         }
 
-        internal Game(User firstPlayer, Board board)
+        internal Game(Participant firstPlayer, Board board)
         {
             Board = board;
             _blackPlayer = new Player(firstPlayer, Disc.Dark);
             _discOfNextMove = Disc.Dark;
         }
 
-        public void JoinOpponent(User joiningUser)
+        public void JoinOpponent(Participant joiningParticipant)
         {
             if(_whitePlayer != null)
                 throw new InvalidOperationException("An opponent has already joined the game");
 
-            _whitePlayer = new Player(joiningUser, Disc.Light);
+            _whitePlayer = new Player(joiningParticipant, Disc.Light);
         }
 
-        public bool UserMakesMove(User user, Position position)
+        public bool UserMakesMove(Participant participant, Position position)
         {
-            var result = false;
-            var player = GetPlayerFromUser(user);
-            if (player == null) return false;
-
-            if (player.Disc == _discOfNextMove)
+            var player = GetActivePlayerFromParticipant(participant);
+            if (!IsPlayersTurn(player))
             {
-                var move = new Move(position, player.Disc);
-                result =  Board.TryDoMove(move);
-                var otherDisc = ToggleDisc(player.Disc);
-                if (Board.HasMoves(otherDisc))
-                {
-                    _discOfNextMove = otherDisc;
-                }
-                else if(Board.HasMoves(player.Disc))
-                {
-                    _discOfNextMove = player.Disc;
-                }
-                else
-                {
-                    GameFinished = true;
-                }
+                return false;
             }
 
-            return result;
+            var validMove = Board.TryDoMove(new Move(position, player.Disc));
+            if (!validMove) return false;
+
+            var nextDisc = ToggleDisc(player);
+            if (nextDisc == null)
+            {
+                GameFinished = true;
+            }
+            else
+            {
+                _discOfNextMove = nextDisc.Value;
+            }
+
+            return true;
         }
 
-        public Disc ToggleDisc(Disc disc)
+        private Disc? ToggleDisc(Player player)
         {
-            if(disc == Disc.Dark) return Disc.Light;
-            return Disc.Dark;
-        }
+            var opponentsDisc = player.Disc == Disc.Dark ? Disc.Light : Disc.Dark;
+            if (Board.HasMoves(opponentsDisc))
+            {
+                return opponentsDisc;
+            }
+            if (Board.HasMoves(player.Disc))
+            {
+                return player.Disc;
+            }
 
-        private Player GetPlayerFromUser(User user)
-        {
-            if(user.Id == _blackPlayer.Id) return _blackPlayer;
-            if(user.Id == _whitePlayer.Id) return _whitePlayer;
             return null;
+        }
+
+        private bool IsPlayersTurn(Player player) => player.Disc == _discOfNextMove;
+
+        private Player GetActivePlayerFromParticipant(Participant participant)
+        {
+            if(participant.Id == _blackPlayer.Id) return _blackPlayer;
+            if(participant.Id == _whitePlayer.Id) return _whitePlayer;
+            throw new ArgumentException("The participant is not a player in this game");
         }
     }
 }

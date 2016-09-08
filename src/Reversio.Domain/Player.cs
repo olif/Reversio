@@ -6,10 +6,10 @@ namespace Reversio.Domain
     {
         public Disc  Disc { get; }
 
-        public Player(User user, Disc disc)
+        public Player(Participant participant, Disc disc)
         {
             Disc = disc;
-            Id = user.Id;
+            Id = participant.Id;
         }
 
         public Guid Id { get; internal set; }
