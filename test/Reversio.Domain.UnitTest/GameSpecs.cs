@@ -2,18 +2,19 @@
 using System.Diagnostics;
 using FluentAssertions;
 using Xunit;
+using FluentAssertions.Events;
 
 namespace Reversio.Domain.UnitTest
 {
     public class GameSpecs
     {
-        private Participant _blackPlayer;
-        private Participant _whitePlayer;
+        private Bystander _blackPlayer;
+        private Bystander _whitePlayer;
 
         public GameSpecs()
         {
-            _blackPlayer = new Participant();
-            _whitePlayer = new Participant();
+            _blackPlayer = new Bystander();
+            _whitePlayer = new Bystander();
         }
 
         [Fact]
@@ -22,7 +23,7 @@ namespace Reversio.Domain.UnitTest
             var game = new Game(_blackPlayer);
             game.JoinOpponent(_whitePlayer);
 
-            Action action = () => game.JoinOpponent(new Participant());
+            Action action = () => game.JoinOpponent(new Bystander());
 
             action.ShouldThrow<InvalidOperationException>();
         }
@@ -31,8 +32,8 @@ namespace Reversio.Domain.UnitTest
         public void BlackPlayer_CanMakeMove_BeforeOpponentHasJoined()
         {
             var game = new Game(_blackPlayer);
-
-            var result = game.UserMakesMove(_blackPlayer, new Position(4, 5));
+            var player = game.GetActivePlayer(_blackPlayer.Id);
+            var result = game.PlayerMakesMove(player, new Position(4, 5));
 
             result.Should().BeTrue();
         }
@@ -41,9 +42,10 @@ namespace Reversio.Domain.UnitTest
         public void Player_Cannot_Make_Multiple_Moves_If_There_Is_A_Valid_Move_For_Opponent()
         {
             var game = new Game(_blackPlayer);
-            game.UserMakesMove(_blackPlayer, new Position(4, 5));
+            var player = game.GetActivePlayer(_blackPlayer.Id);
+            game.PlayerMakesMove(player, new Position(4, 5));
 
-            var result = game.UserMakesMove(_blackPlayer, new Position(2, 3));
+            var result = game.PlayerMakesMove(player, new Position(2, 3));
 
             result.Should().BeFalse();
         }
@@ -74,9 +76,10 @@ namespace Reversio.Domain.UnitTest
             var board = new Board(positions.Translate());
             var game = new Game(_blackPlayer, board);
             game.JoinOpponent(_whitePlayer);
-            game.UserMakesMove(_blackPlayer, new Position(5, 0));
+            var player = game.GetActivePlayer(_blackPlayer.Id);
+            game.PlayerMakesMove(player, new Position(5, 0));
             
-            var result = game.UserMakesMove(_blackPlayer, new Position(5, 2));
+            var result = game.PlayerMakesMove(player, new Position(5, 2));
 
             result.Should().BeTrue();
         }
@@ -84,6 +87,7 @@ namespace Reversio.Domain.UnitTest
         [Fact]
         public void GameIsFinished_If_No_Moves_Are_Left()
         {
+            var gameFinished = false;
             var positions = new[,]
             {
 
@@ -106,25 +110,12 @@ namespace Reversio.Domain.UnitTest
 
             var board = new Board(positions.Translate());
             var game = new Game(_blackPlayer, board);
+            var player = game.GetActivePlayer(_blackPlayer.Id);
             game.JoinOpponent(_whitePlayer);
-            game.UserMakesMove(_blackPlayer, new Position(0, 3));
+            game.GameFinished += (o, e) => gameFinished = true;
+            game.PlayerMakesMove(player, new Position(0, 3));
 
-            Debug.WriteLine(game.Board);
-            game.GameFinished.Should().BeTrue();
-
+            gameFinished.Should().BeTrue();
         }
-
-        //[Fact]
-        //public void Can_Place_Brick()
-        //{
-        //    var user1 = new User();
-        //    var game = new Game(user1);
-        //    var user2 = new User();
-
-        //    game.JoinOpponent(user2);
-
-        //    var position = new Position(1, 2);
-        //    game.UserMakesMove(user1, position);
-        //}
     }
 }

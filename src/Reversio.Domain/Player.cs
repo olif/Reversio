@@ -6,7 +6,7 @@ namespace Reversio.Domain
     {
         public Disc  Disc { get; }
 
-        public Player(Participant participant, Disc disc)
+        public Player(Bystander participant, Disc disc)
         {
             Disc = disc;
             Id = participant.Id;

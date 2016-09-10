@@ -2,39 +2,51 @@
 
 namespace Reversio.Domain
 {
+
     /// <summary>
     /// Represents an ongoing game
     /// </summary>
     public class Game
     {
-        private Player _blackPlayer;
+        private readonly Player _blackPlayer;
         private Player _whitePlayer;
         private Disc _discOfNextMove;
-        public bool GameFinished = false;
         public readonly Board Board;
+        public Guid GameId { get; }
 
-        public Game(Participant firstPlayer) : this(firstPlayer, new Board())
-        {
-        }
+        public Game(Bystander firstPlayer) : this(firstPlayer, new Board())
+        {}
 
-        internal Game(Participant firstPlayer, Board board)
+        internal Game(Bystander firstPlayer, Board board)
         {
+            GameId = Guid.NewGuid();
             Board = board;
             _blackPlayer = new Player(firstPlayer, Disc.Dark);
             _discOfNextMove = Disc.Dark;
         }
 
-        public void JoinOpponent(Participant joiningParticipant)
+        public GameState CurrentState => new GameState(GameId, Board, _discOfNextMove);
+
+        public event GameFinishedHandler GameFinished;
+
+        public event PlayerJoinedHandler PlayerJoined;
+
+        private void OnGameFinished()
+        {
+            GameFinished?.Invoke(this, new GameFinishedEventArgs(CurrentState));
+        }
+
+        public void JoinOpponent(Bystander joiningParticipant)
         {
             if(_whitePlayer != null)
                 throw new InvalidOperationException("An opponent has already joined the game");
 
             _whitePlayer = new Player(joiningParticipant, Disc.Light);
+            OnPlayerJoined();
         }
 
-        public bool UserMakesMove(Participant participant, Position position)
+        public bool PlayerMakesMove(Player player, Position position)
         {
-            var player = GetActivePlayerFromParticipant(participant);
             if (!IsPlayersTurn(player))
             {
                 return false;
@@ -46,7 +58,7 @@ namespace Reversio.Domain
             var nextDisc = ToggleDisc(player);
             if (nextDisc == null)
             {
-                GameFinished = true;
+                OnGameFinished();
             }
             else
             {
@@ -73,11 +85,16 @@ namespace Reversio.Domain
 
         private bool IsPlayersTurn(Player player) => player.Disc == _discOfNextMove;
 
-        private Player GetActivePlayerFromParticipant(Participant participant)
+        public Player GetActivePlayer(Guid playerId)
         {
-            if(participant.Id == _blackPlayer.Id) return _blackPlayer;
-            if(participant.Id == _whitePlayer.Id) return _whitePlayer;
+            if(playerId == _blackPlayer.Id) return _blackPlayer;
+            if(playerId == _whitePlayer.Id) return _whitePlayer;
             throw new ArgumentException("The participant is not a player in this game");
+        }
+
+        private void OnPlayerJoined()
+        {
+            PlayerJoined?.Invoke(this);
         }
     }
 }

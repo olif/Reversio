@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace Reversio.Domain
 {
@@ -47,6 +48,23 @@ namespace Reversio.Domain
         internal Board(int[,] positions)
         {
             _positions = positions;
+        }
+
+
+        public int[,] CurrentState {
+            get
+            {
+                var copy = new int[EdgeSize, EdgeSize];
+                for (var i = 0; i < EdgeSize; i++)
+                {
+                    for (var j = 0; j < EdgeSize; j++)
+                    {
+                        copy[i, j] = _positions[i, j];
+                    }
+                }
+
+                return copy;
+            }
         }
 
         /// <summary>
