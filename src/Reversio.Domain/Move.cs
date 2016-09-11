@@ -4,21 +4,15 @@
     {
         public Position Position { get; }
 
-        public Move(Position position, Disc color)
+        public Move(Position position, Disc disc)
         {
             Position = position;
-            Color = color;
+            Disc = disc;
         }
         public Move(int x, int y, Disc color) : this(new Position(x, y), color)
         {
         }
 
-        public Disc Color { get; }
-    }
-
-    public enum Disc
-    {
-        Dark = -1,
-        Light = 1
+        public Disc Disc { get; }
     }
 }

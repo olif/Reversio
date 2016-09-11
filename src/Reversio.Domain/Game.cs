@@ -62,13 +62,13 @@ namespace Reversio.Domain
             }
             else
             {
-                _discOfNextMove = nextDisc.Value;
+                _discOfNextMove = nextDisc;
             }
 
             return true;
         }
 
-        private Disc? ToggleDisc(Player player)
+        private Disc ToggleDisc(Player player)
         {
             var opponentsDisc = player.Disc == Disc.Dark ? Disc.Light : Disc.Dark;
             if (Board.HasMoves(opponentsDisc))

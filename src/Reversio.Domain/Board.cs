@@ -102,7 +102,7 @@ namespace Reversio.Domain
         private void UpdateState(Move move, IList<Position> piecesToFlip)
         {
             // Place the brick
-            _positions[move.Position.Y, move.Position.X] = (int) move.Color;
+            _positions[move.Position.Y, move.Position.X] = move.Disc.Color;
             // Switch color of all bricks that we are flipping
             foreach (var piece in piecesToFlip)
             {
@@ -147,7 +147,7 @@ namespace Reversio.Domain
                     }
 
                     // Our own color
-                    if (_positions[yPos, xPos] == (int) move.Color)
+                    if (_positions[yPos, xPos] == move.Disc.Color)
                     {
                         break;
                     }

@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reversio.Domain
 {
-    public class GameEngine
+    public class GamesTable
     {
-        public IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
-
-        public GameEngine()
-        {
-        }
+        private readonly IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
 
         public Game CreateNewGame(Bystander firstPlayer)
         {
@@ -20,6 +14,11 @@ namespace Reversio.Domain
             _activeGames.Add(game.GameId, game);
 
             return game;
+        }
+
+        public Game GetGameById(Guid id)
+        {
+            return _activeGames[id];
         }
     }
 }
