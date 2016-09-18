@@ -18,6 +18,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Domain.UnitTest", 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Server", "src\Reversio.Server\Reversio.Server.xproj", "{82A1B05F-14AB-43F7-81B1-17384A27EBC1}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.UI", "src\Reversio.UI\Reversio.UI.xproj", "{5D9E1275-C154-4594-88D9-233F73EE9565}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{82A1B05F-14AB-43F7-81B1-17384A27EBC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82A1B05F-14AB-43F7-81B1-17384A27EBC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82A1B05F-14AB-43F7-81B1-17384A27EBC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D9E1275-C154-4594-88D9-233F73EE9565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D9E1275-C154-4594-88D9-233F73EE9565}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D9E1275-C154-4594-88D9-233F73EE9565}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D9E1275-C154-4594-88D9-233F73EE9565}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +50,6 @@ Global
 		{B5DA2B6F-8E2E-4EE3-AB5F-50AC57142D13} = {03418E83-01DC-4456-83A5-29E250C6134F}
 		{98DE6BEF-A267-433B-8427-EF6B82BE6A37} = {9DD46016-6D52-49A7-9AA8-5517A85C1213}
 		{82A1B05F-14AB-43F7-81B1-17384A27EBC1} = {03418E83-01DC-4456-83A5-29E250C6134F}
+		{5D9E1275-C154-4594-88D9-233F73EE9565} = {03418E83-01DC-4456-83A5-29E250C6134F}
 	EndGlobalSection
 EndGlobal
