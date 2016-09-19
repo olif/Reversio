@@ -13,8 +13,8 @@ namespace Reversio.Domain.UnitTest
 
         public GameSpecs()
         {
-            _blackPlayer = new Bystander();
-            _whitePlayer = new Bystander();
+            _blackPlayer = new Bystander("player1");
+            _whitePlayer = new Bystander("player2");
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace Reversio.Domain.UnitTest
             var game = new Game(_blackPlayer);
             game.JoinOpponent(_whitePlayer);
 
-            Action action = () => game.JoinOpponent(new Bystander());
+            Action action = () => game.JoinOpponent(new Bystander("player"));
 
             action.ShouldThrow<InvalidOperationException>();
         }

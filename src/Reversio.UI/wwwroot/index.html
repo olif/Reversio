@@ -3,48 +3,50 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
-    <style>
-        td {
-            width: 50px;
-            height: 50px;
-        }
-
-        table {
-            background-color: green;
-            border-collapse: collapse;
-            border-spacing: 0;
-            text-align: center;
-            vertical-align: middle;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="test">
-    hej
-</div>
-<script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js"></script>
+
+    <div class="signin">
+        <form id="signin-form">
+            <label>
+                Player:
+                <input type="text" id="player-name" />
+                <button type="submit">Go!</button>
+            </label>
+        </form>
+    </div>
+
+    <div class="board-container">
+    </div>
+
+    <div class="container" id="container"></div>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.0/lodash.min.js"></script>
+    <script src="Reversio.js"></script>
 <script>
-
-    var playerId = 'bfd6bec5-2d90-4165-b598-43b192b821da';
-    var gameId = '816e9847-249f-43bc-980e-463b8a91471b';
-
-    $('.test').on('click', function() {
-        var html = '<table>';
-        for (var i = 0; i < 8; i++) {
-            html += '<tr>';
-            for (var j = 0; j < 8; j++) {
-                html += '<td>' + (i + j) + '</td>';
+    $('#signin-form').on('submit', function(e) {
+        e.preventDefault();
+        var playerName = $(this).find('#player-name').val();
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:53274/api/game/signin',
+            data: { name: playerName },
+            dataType: 'json',
+            success: function(data) {
+                console.log(data);
             }
-            html += '</tr>';
-        }
-        html += '</table>';
-
-        $(this).after(html);
+        });
+        //$.post('http://localhost:53274/api/game/signin',
+        //   playerName,
+        //    function(data) {
+        //        console.log(data);
+        //    }, null, 'json');
     });
 
 
+
+    //$('.board-container').append(reversio.createBoard());
 </script>
 </body>
 </html>

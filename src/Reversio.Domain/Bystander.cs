@@ -4,10 +4,14 @@ namespace Reversio.Domain
 {
     public class Bystander
     {
-        public Bystander()
+        public Bystander(string name)
         {
             Id = Guid.NewGuid();
+            Name = name;
         }
-        public Guid Id { get; set; }
+
+        public string Name { get; }
+
+        public Guid Id { get; }
     }
 }

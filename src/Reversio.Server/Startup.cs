@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,17 @@ namespace Reversio.Server
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            var corsBuilder = new CorsPolicyBuilder();
+            corsBuilder.AllowAnyOrigin();
+            corsBuilder.AllowAnyHeader();
+            corsBuilder.AllowAnyMethod();
+            corsBuilder.AllowCredentials();
+            services.AddSingleton<GameServer>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", corsBuilder.Build());
+            });
             services.AddSignalR(options =>
             {
                 options.Hubs.EnableDetailedErrors = true;
@@ -41,7 +53,8 @@ namespace Reversio.Server
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            app.UseDeveloperExceptionPage();
+            app.UseCors("AllowAll");
             app.UseWebSockets();
             app.UseSignalR("/test/hubs");
             app.UseMvc();

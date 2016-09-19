@@ -1,0 +1,23 @@
+body {
+  text-align: center; }
+
+.board-container {
+  width: 100%;
+  text-align: center; }
+
+.board {
+  background-color: forestgreen; }
+  .board td {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black; }
+    .board td span {
+      margin: 5px;
+      height: 60px;
+      width: 60px;
+      border-radius: 60px;
+      display: block; }
+      .board td span.white {
+        background-color: white; }
+      .board td span.black {
+        background-color: black; }
