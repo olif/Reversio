@@ -1,30 +1,39 @@
 ﻿var gulp = require('gulp');
-var babel = require('gulp-babel');
-var sass = require('gulp-sass');
+var sourcemaps = require('gulp-sourcemaps');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var browserify = require('browserify');
+var watchify = require('watchify');
+var babel = require('babelify');
 
-gulp.task('es6', function () {
-    return gulp.src('app/**/*.js')
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(gulp.dest('wwwroot'));
-});
+function compile(watch) {
+    var bundler = watchify(browserify('./app/index.js', { debug: true }).transform(babel));
 
-gulp.task('sass', function() {
-    return gulp.src('app/**/*.scss')
-        .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest('wwwroot'));
-});
+    function rebundle() {
+        bundler.bundle()
+          .on('error', function (err) { console.error(err); this.emit('end'); })
+          .pipe(source('build.js'))
+          .pipe(buffer())
+          .pipe(sourcemaps.init({ loadMaps: true }))
+          .pipe(sourcemaps.write('./'))
+          .pipe(gulp.dest('./wwwroot'));
+    }
 
-gulp.task('default', ['es6'], function() {
-});
+    if (watch) {
+        bundler.on('update', function () {
+            console.log('-> bundling...');
+            rebundle();
+        });
+    }
 
-gulp.task('watch-js', function() {
-    return gulp.watch('app/**/*.js', ['es6']);
-});
+    rebundle();
+}
 
-gulp.task('watch-css', function() {
-    return gulp.watch('app/**/*.scss', ['sass']);
-});
+function watch() {
+    return compile(true);
+};
 
-gulp.task('watch', ['watch-js', 'watch-css']);
+gulp.task('build', function () { return compile(); });
+gulp.task('watch', function () { return watch(); });
+
+gulp.task('default', ['watch']);
