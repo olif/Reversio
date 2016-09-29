@@ -10,6 +10,7 @@ namespace Reversio.Server
     public class GameServer
     {
         private readonly IDictionary<Guid, Game> _gamesTable = new ConcurrentDictionary<Guid, Game>();
+        private readonly IDictionary<string, Bystander> _bystanders = new ConcurrentDictionary<string, Bystander>();
 
         public Game CreateNewGame(Bystander firstPlayer)
         {
@@ -18,6 +19,13 @@ namespace Reversio.Server
             return game;
         }
 
-        public IEnumerable<Game> GetGames => _gamesTable.Values;
+        public void RegisterBystander(Bystander bystander)
+        {
+            _bystanders.Add(bystander.Name, bystander);
+        }
+
+        public IEnumerable<Game> ActiveGames => _gamesTable.Values;
+
+        public IEnumerable<Bystander> Bystanders => _bystanders.Values;
     }
 }

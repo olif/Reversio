@@ -16,7 +16,7 @@ namespace Reversio.Server
 
         public IEnumerable<Game> GetGames()
         {
-            return _gameServer.GetGames;
+            return _gameServer.ActiveGames;
         }
     }
 }

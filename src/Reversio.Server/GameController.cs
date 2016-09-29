@@ -33,7 +33,15 @@ namespace Reversio.Server
         public IActionResult SignInBystander(Person person)
         {
             var bystander = new Bystander(person.Name);
+            _gameServer.RegisterBystander(bystander);
             return Ok(bystander);
+        }
+
+        [HttpGet("games/active")]
+        public IActionResult GetActiveGames()
+        {
+            var games = _gameServer.ActiveGames;
+            return Ok(games);
         }
     }
 
