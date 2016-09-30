@@ -10,10 +10,13 @@
 <div class="container">
 </div>
 
+<button type="button" class="send">Skicka</button>
+
 <script src="node_modules/traceur/bin/traceur.js"></script>
 <script src="node_modules/systemjs/dist/system.js"></script>
 <script>
     System.paths['jquery'] = './node_modules/jquery/dist/jquery.js';
+    System.paths['socketio'] = './node_modules/socket.io-client/socket.io.js';
     System.import('src/app.js');
 </script>
 </body>

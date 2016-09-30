@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Reversio.Server
 {
-    public class GameServer
+    public class GameEngine
     {
         private readonly IDictionary<Guid, Game> _gamesTable = new ConcurrentDictionary<Guid, Game>();
         private readonly IDictionary<string, Bystander> _bystanders = new ConcurrentDictionary<string, Bystander>();

@@ -35,15 +35,11 @@ namespace Reversio.Server
             corsBuilder.AllowAnyHeader();
             corsBuilder.AllowAnyMethod();
             corsBuilder.AllowCredentials();
-            services.AddSingleton<GameServer>();
-
+            services.AddSingleton<GameEngine>();
+            services.AddSingleton<WebSocketServer>();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", corsBuilder.Build());
-            });
-            services.AddSignalR(options =>
-            {
-                options.Hubs.EnableDetailedErrors = true;
             });
             services.AddMvc();
         }
@@ -56,7 +52,7 @@ namespace Reversio.Server
             app.UseDeveloperExceptionPage();
             app.UseCors("AllowAll");
             app.UseWebSockets();
-            app.UseSignalR("/test/hubs");
+            app.UseGameServer();
             app.UseMvc();
         }
     }

@@ -3,6 +3,7 @@ import {Signin} from './signin.js';
 import {GamesTable} from './games-table.js';
 import {GameServer} from './gameserver.js';
 import $ from 'jquery';
+import socketio from 'socketio';
 
 export class App {
     constructor() {
@@ -33,3 +34,20 @@ export class App {
 } 
 
 let app = new App();
+var websocket = new WebSocket('ws://localhost:53274');
+websocket.onopen = function() {
+    console.log('websocket open');
+}
+
+setTimeout(() => {
+    console.log('sending');
+    websocket.send('testing');
+}, 2000);
+
+websocket.onmessage = function(evt) {
+    console.log(evt);
+}
+
+$('.send').on('click', function() {
+    websocket.send('testing');
+});
