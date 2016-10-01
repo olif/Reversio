@@ -10,7 +10,7 @@ namespace Reversio.Server
     [Route("api/[controller]")]
     public class GameController : Controller
     {
-        private readonly GameServer _gameServer;
+        /*private readonly GameServer _gameServer;
 
         public GameController(GameServer server)
         {
@@ -42,7 +42,7 @@ namespace Reversio.Server
         {
             var games = _gameServer.ActiveGames;
             return Ok(games);
-        }
+        }*/
     }
 
     public class Person

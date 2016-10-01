@@ -4,26 +4,26 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Reversio.WebSocketServer
+namespace Reversio.WebSockets
 {
     public abstract class ServerOld
     {
-        private readonly IDictionary<Guid, WebSocketConnection> _activeConnections =
-            new ConcurrentDictionary<Guid, WebSocketConnection>();
+        private readonly IDictionary<Guid, WebSocketConnection1> _activeConnections =
+            new ConcurrentDictionary<Guid, WebSocketConnection1>();
 
         protected ServerOld()
         {
         }
 
-        protected IEnumerable<WebSocketConnection> ActiveConnections => _activeConnections.Values;
+        protected IEnumerable<WebSocketConnection1> ActiveConnections => _activeConnections.Values;
 
-        protected abstract Task OnConnected(WebSocketConnection connection);
+        protected abstract Task OnConnected(WebSocketConnection1 connection);
 
-        protected abstract Task OnMessageReceived(WebSocketConnection connection, string msg);
+        protected abstract Task OnMessageReceived(WebSocketConnection1 connection, string msg);
 
-        protected abstract Task OnClose(WebSocketConnection connection);
+        protected abstract Task OnClose(WebSocketConnection1 connection);
 
-        private async Task OnCloseInternal(WebSocketConnection connection)
+        private async Task OnCloseInternal(WebSocketConnection1 connection)
         {
             _activeConnections.Remove(connection.Id);
             await OnClose(connection);
@@ -46,7 +46,7 @@ namespace Reversio.WebSocketServer
         {
             var socket = await httpContext.WebSockets.AcceptWebSocketAsync();
             var connectionId = Guid.NewGuid();
-            var connection = new WebSocketConnection(
+            var connection = new WebSocketConnection1(
                 socket,
                 connectionId)
             {

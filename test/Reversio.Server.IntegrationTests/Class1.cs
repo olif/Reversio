@@ -21,14 +21,32 @@ namespace Reversio.Server.IntegrationTests
         {
             _testServer = new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
             _client = _testServer.CreateWebSocketClient();
+            _stub = TestStartup.Server;
         }
 
         [Fact]
         public async Task Test()
         {
+            bool isOnOpenCalled = false;
+            bool messageReceived = false;
+            _stub.OnOpen = (conn) =>
+            {
+                isOnOpenCalled = true;
+            };
+
+            _stub.OnMessage = (conn, msg) =>
+            {
+                messageReceived = true;
+            };
+
             var socket = await _client.ConnectAsync(new Uri("http://localhost"), CancellationToken.None);
-            var data = Encoding.UTF8.GetBytes("hello");
-            await socket.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Text, true, CancellationToken.None);
+            await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes("hello")), WebSocketMessageType.Text, true,
+                CancellationToken.None);
+
+            Thread.Sleep(100);
+
+            isOnOpenCalled.Should().BeTrue();
+            messageReceived.Should().BeTrue();
         }
     }
 }

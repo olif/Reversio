@@ -22,7 +22,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.UI", "src\Reversio
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.Server.IntegrationTests", "test\Reversio.Server.IntegrationTests\Reversio.Server.IntegrationTests.xproj", "{0202DC69-1A42-462B-BA30-A4A722291125}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.WebSocketServer", "src\Reversio.WebSocketServer\Reversio.WebSocketServer.xproj", "{5B40C793-7628-4397-AB3C-F6954DFFB0FC}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Reversio.WebSockets", "src\Reversio.WebSockets\Reversio.WebSockets.xproj", "{5B40C793-7628-4397-AB3C-F6954DFFB0FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,20 +4,20 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Reversio.WebSocketServer
+namespace Reversio.WebSockets
 {
-    public class WebSocketConnection : IDisposable
+    public class WebSocketConnection1 : IDisposable
     {
         private readonly WebSocket _socket;
         private WebSocketState _currentState;
         public Guid Id { get; }
-        public Action<WebSocketConnection> OnConnected;
-        public Action<WebSocketConnection, string> OnMessageReceived;
-        public Action<WebSocketConnection> OnClose;
+        public Action<WebSocketConnection1> OnConnected;
+        public Action<WebSocketConnection1, string> OnMessageReceived;
+        public Action<WebSocketConnection1> OnClose;
         private CancellationTokenSource _cancellationToken;
         private Task _task;
 
-        public WebSocketConnection(WebSocket socket, Guid id)
+        public WebSocketConnection1(WebSocket socket, Guid id)
         {
             _socket = socket;
             Id = id;

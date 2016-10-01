@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Reversio.WebSocketServer;
 
 namespace Reversio.Server
 {
@@ -31,7 +30,6 @@ namespace Reversio.Server
             corsBuilder.AllowAnyHeader();
             corsBuilder.AllowAnyMethod();
             corsBuilder.AllowCredentials();
-            services.AddSingleton<GameServer>();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", corsBuilder.Build());
@@ -47,7 +45,6 @@ namespace Reversio.Server
             app.UseDeveloperExceptionPage();
             app.UseCors("AllowAll");
             app.UseWebSockets();
-            app.UseGameServer();
             app.UseMvc();
         }
     }

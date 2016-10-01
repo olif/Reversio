@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace Reversio.WebSocketServer
+namespace Reversio.WebSockets
 {
     public static class GameServerExtensions
     {
@@ -20,19 +20,19 @@ namespace Reversio.WebSocketServer
     public class SimpleServerMiddleware
     {
         private readonly RequestDelegate _next;
-        private SimpleWebSocketServer _server;
+        private WebSocketServer _server;
 
-        public SimpleServerMiddleware(RequestDelegate next)
+        public SimpleServerMiddleware(RequestDelegate next, WebSocketServer server)
         {
             _next = next;
-            _server = new SimpleWebSocketServer();
+            _server = server;
         }
 
         public async Task Invoke(HttpContext context)
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
-               await _server.ProcessRequest(context);
+                await _server.ProcessRequest(context);
             }
             else
             {
