@@ -14,7 +14,8 @@
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.1",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
-    "Microsoft.NETCore.App": "1.0.1"
+    "Microsoft.NETCore.App": "1.0.1",
+    "Reversio.WebSocketServer": "1.0.0-*"
   },
 
   "tools": {
@@ -22,7 +23,7 @@
   },
 
   "frameworks": {
-    "netcoreapp1.5": {
+    "netcoreapp1.6": {
       "imports": [
         "dotnet5.6",
         "portable-net45+win8"

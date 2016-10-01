@@ -39,11 +39,6 @@ websocket.onopen = function() {
     console.log('websocket open');
 }
 
-setTimeout(() => {
-    console.log('sending');
-    websocket.send('testing');
-}, 2000);
-
 websocket.onmessage = function(evt) {
     console.log(evt);
 }

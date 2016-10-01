@@ -10,9 +10,9 @@ namespace Reversio.Server
     [Route("api/[controller]")]
     public class GameController : Controller
     {
-        private readonly GameEngine _gameServer;
+        private readonly GameServer _gameServer;
 
-        public GameController(GameEngine server)
+        public GameController(GameServer server)
         {
             _gameServer = server;
         }
