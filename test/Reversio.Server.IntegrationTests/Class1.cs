@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Reversio.WebSockets;
 using Xunit;
 
 namespace Reversio.Server.IntegrationTests
@@ -16,7 +17,7 @@ namespace Reversio.Server.IntegrationTests
         private TestServer _testServer;
         private WebSocketClient _client;
         private WebSocketServerStub _stub;
-        
+
         public Class1()
         {
             _testServer = new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
@@ -29,12 +30,12 @@ namespace Reversio.Server.IntegrationTests
         {
             bool isOnOpenCalled = false;
             bool messageReceived = false;
-            _stub.OnOpen = (conn) =>
+            _stub.ConnectionOpened = (conn) =>
             {
                 isOnOpenCalled = true;
             };
 
-            _stub.OnMessage = (conn, msg) =>
+            _stub.MessageReceived = (conn, msg) =>
             {
                 messageReceived = true;
             };
@@ -47,6 +48,41 @@ namespace Reversio.Server.IntegrationTests
 
             isOnOpenCalled.Should().BeTrue();
             messageReceived.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task CloseTest()
+        {
+            bool messageReceived = false;
+            bool connectionClosed = false;
+            _stub.MessageReceived = async (conn, msg) =>
+            {
+                messageReceived = true;
+                await conn.Send("hej hel");
+                await conn.CloseConnection();
+            };
+
+            var socket = await _client.ConnectAsync(new Uri("http://localhost"), CancellationToken.None);
+            var s = new WebSocketConnection(socket, CancellationToken.None);
+            s.OnClose = () =>
+            {
+                connectionClosed = true;
+            };
+            s.OnMessage = (msg) =>
+            {
+                ;
+            };
+            var t = new Thread(async () =>
+            {
+                await s.ProcessRequest(CancellationToken.None);
+            });
+            await s.Send("hello");
+            t.Start();
+
+            while (true) ;
+
+            messageReceived.Should().BeTrue();
+            connectionClosed.Should().BeTrue();
         }
     }
 }

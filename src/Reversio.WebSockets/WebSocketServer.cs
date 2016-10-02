@@ -13,16 +13,16 @@ namespace Reversio.WebSockets
         private readonly IDictionary<Guid, IWebSocketConnection> _activeConnections = 
             new ConcurrentDictionary<Guid, IWebSocketConnection>();
 
-        public virtual Action<IWebSocketConnection> OnOpen { get; set; }
+        public abstract void OnMessageReceived(IWebSocketConnection conn, string message);
 
-        public virtual Action<IWebSocketConnection, string> OnMessage { get; set; }
+        public abstract void OnConnectionClosed(IWebSocketConnection conn);
 
-        public virtual Action<IWebSocketConnection> OnClose { get; set; }
+        public abstract void OnConnectionOpened(IWebSocketConnection conn);
 
         private void OnCloseInternal(IWebSocketConnection connection)
         {
             _activeConnections.Remove(connection.Id);
-            OnClose(connection);
+            OnConnectionClosed(connection);
         }
 
         internal async Task ProcessRequest(HttpContext context)
@@ -30,13 +30,14 @@ namespace Reversio.WebSockets
             try
             {
                 var socket = await context.WebSockets.AcceptWebSocketAsync(subProtocol: null);
-                var connection = new WebSocketConnection();
+
+                var connection = new WebSocketConnection(socket, CancellationToken.None);
+                connection.OnOpen = () => OnConnectionOpened(connection);
+                connection.OnMessage = (msg) => OnMessageReceived(connection, msg);
+                connection.OnClose = () => OnCloseInternal(connection);
+
                 _activeConnections.Add(connection.Id, connection);
-
-                connection.OnMessage = (msg) => OnMessage?.Invoke(connection, msg);
-                OnOpen?.Invoke(connection);
-
-                await connection.ProcessRequest(socket, CancellationToken.None);
+                await connection.ProcessRequest(CancellationToken.None);
             }
             catch (Exception)
             {

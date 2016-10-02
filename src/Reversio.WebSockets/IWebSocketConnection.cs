@@ -10,5 +10,7 @@ namespace Reversio.WebSockets
         Guid Id { get; }
 
         Task Send(string message);
+
+        Task CloseConnection();
     }
 }
