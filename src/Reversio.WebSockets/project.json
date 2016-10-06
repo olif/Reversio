@@ -1,7 +1,6 @@
 ﻿{
   "version": "1.0.0-*",
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
     "Microsoft.AspNetCore.WebSockets": "0.2.0-alpha1-22117"
   },
 

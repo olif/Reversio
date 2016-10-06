@@ -3,7 +3,6 @@
   "testRunner": "xunit",
   "dependencies": {
     "Microsoft.AspNetCore.TestHost": "1.0.0",
-    "NETStandard.Library": "1.6.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"
@@ -15,8 +14,8 @@
   },
 
   "frameworks": {
-    "netcoreapp1.6": {
-      "imports": "dnxcore50"
+        "netcoreapp1.0": {
+         
+        }
     }
-  }
 }
