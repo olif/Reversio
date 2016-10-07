@@ -31,7 +31,7 @@ namespace Reversio.WebSockets
 
             Id = Guid.NewGuid();
             OnOpen = () => { };
-            //OnClose = () => { };
+            OnClose = () => { };
             OnError = (ex) => { };
             OnMessage = (msg) => { };
         }
@@ -59,7 +59,7 @@ namespace Reversio.WebSockets
                 {
                     try
                     {
-                        await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                        await _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
                     }
                     catch
                     {
@@ -105,7 +105,7 @@ namespace Reversio.WebSockets
 
         private async Task SendCloseResponse()
         {
-            if (_socket.State != WebSocketState.CloseSent)
+            if (_socket.State == WebSocketState.CloseReceived)
             {
                 await _taskQueue.Enqueue(() => _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None));
             }

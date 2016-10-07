@@ -14,14 +14,13 @@ namespace Reversio.Server.IntegrationTests
 {
     public class WebSocketServerTests
     {
-        private readonly TestServer _testServer;
         private readonly WebSocketClient _client;
         private readonly WebSocketServerStub _stub;
 
         public WebSocketServerTests()
         {
-            _testServer = new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
-            _client = _testServer.CreateWebSocketClient();
+            var testServer = new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
+            _client = testServer.CreateWebSocketClient();
             _stub = TestStartup.Server;
         }
 
@@ -64,7 +63,7 @@ namespace Reversio.Server.IntegrationTests
         }
 
         [Fact]
-        public async Task Test()
+        public async Task CloseInitiatedByClient_InvokesOnCloseOnServer()
         {
             var connHasBeenClosed = false;
             _stub.MessageReceived = async (conn, _) =>
@@ -74,76 +73,22 @@ namespace Reversio.Server.IntegrationTests
             };
 
             var socket = await _client.ConnectAsync(new Uri("http://localhost"), CancellationToken.None);
-            var clientConn = new WebSocketConnection(socket, CancellationToken.None);
-            clientConn.OnClose = () => connHasBeenClosed = true;
+            var clientConn = new WebSocketConnection(socket, CancellationToken.None)
+            {
+                OnClose = () => connHasBeenClosed = true
+            };
+
             var thread = new Thread(async () => await clientConn.ProcessRequest(CancellationToken.None));
             thread.Start();
+
             await socket.SendAsync(GetWebsocketMsg("close"), WebSocketMessageType.Text, true, CancellationToken.None);
-            await Task.Delay(500);
+
+            // This delay must be increased if running test in debug-mode
+            await Task.Delay(400);
 
             connHasBeenClosed.Should().BeTrue();
         }
 
         private ArraySegment<byte> GetWebsocketMsg(string msg) => new ArraySegment<byte>(Encoding.UTF8.GetBytes(msg));
-
-        //[Fact]
-        //public async Task Test()
-        //{
-        //    bool isOnOpenCalled = false;
-        //    bool messageReceived = false;
-        //    _stub.ConnectionOpened = (conn) =>
-        //    {
-        //        isOnOpenCalled = true;
-        //    };
-
-        //    _stub.MessageReceived = (conn, msg) =>
-        //    {
-        //        messageReceived = true;
-        //    };
-
-        //    var socket = await _client.ConnectAsync(new Uri("http://localhost"), CancellationToken.None);
-        //    await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes("hello")), WebSocketMessageType.Text, true,
-        //        CancellationToken.None);
-
-        //    Thread.Sleep(100);
-
-        //    isOnOpenCalled.Should().BeTrue();
-        //    messageReceived.Should().BeTrue();
-        //}
-
-        //[Fact]
-        //public async Task CloseTest()
-        //{
-        //    bool messageReceived = false;
-        //    bool connectionClosed = false;
-        //    _stub.MessageReceived = async (conn, msg) =>
-        //    {
-        //        messageReceived = true;
-        //        await conn.Send("hej hel");
-        //        await conn.CloseConnection();
-        //    };
-
-        //    var socket = await _client.ConnectAsync(new Uri("http://localhost"), CancellationToken.None);
-        //    var s = new WebSocketConnection(socket, CancellationToken.None);
-        //    s.OnClose = () =>
-        //    {
-        //        connectionClosed = true;
-        //    };
-        //    s.OnMessage = (msg) =>
-        //    {
-        //        ;
-        //    };
-        //    var t = new Thread(async () =>
-        //    {
-        //        await s.ProcessRequest(CancellationToken.None);
-        //    });
-        //    await s.Send("hello");
-        //    t.Start();
-
-        //    while (true) ;
-
-        //    messageReceived.Should().BeTrue();
-        //    connectionClosed.Should().BeTrue();
-        //}
     }
 }
