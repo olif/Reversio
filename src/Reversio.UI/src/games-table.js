@@ -1,24 +1,33 @@
 import {GameServer} from './gameserver.js';
 
 export class GamesTable {
-    constructor() {
+    constructor(createNewGameCallback) {
         this.element = this.createElement();
+        this.createNewGame = createNewGameCallback;
     }
 
     createElement() {
-        let html = '<table class="game-table"></html>'
-        html += '</table>';
+        let html = `<div class="games-page">
+                        <table class="game-table"></html>
+                        </table>
+                        <button type="button" class="new-game-btn">Create new game</button>
+                    </div>`;
+
+        $('body').on('click', '.new-game-btn', (e) => this.createNewGame(e))
         return $(html);
     }
 
     updateTable(games) {
-        games = [{gameId: 1}];
-        this.element.find('tr').remove();
         let html = '';
+        let table = $(this.element).find('table');
+
+        table.find('tr').remove();
+
         for(let game of games) {
             html += `<tr><td>${game.gameId}</td></tr>`
         }
-        this.element.append($(html));
+        
+        table.append($(html));
     }
 
     appendToElement(elem) {

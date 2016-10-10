@@ -1,7 +1,8 @@
 ﻿{
   "version": "1.0.0-*",
   "dependencies": {
-    "Microsoft.AspNetCore.WebSockets": "0.2.0-alpha1-22117"
+    "Microsoft.AspNetCore.WebSockets": "0.2.0-alpha1-22117",
+    "NETStandard.Library": "1.6.0"
   },
 
   "frameworks": {

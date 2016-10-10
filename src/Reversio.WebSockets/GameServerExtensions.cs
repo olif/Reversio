@@ -20,7 +20,7 @@ namespace Reversio.WebSockets
     public class SimpleServerMiddleware
     {
         private readonly RequestDelegate _next;
-        private WebSocketServer _server;
+        private readonly WebSocketServer _server;
 
         public SimpleServerMiddleware(RequestDelegate next, WebSocketServer server)
         {

@@ -11,8 +11,7 @@ export class Signin {
                             <input type="text" class="username" />
                         </label>
                         <button type="submit" class="login-button">Sign in</button>
-                    </form>
-                    `
+                    </form>`;
 
         let elem = $(html);
         $('body').on('submit', '.signin', (e) => this.onSubmit(e))

@@ -7,10 +7,11 @@ import socketio from 'socketio';
 
 export class App {
     constructor() {
+        this.bystander = null;
         this.signin = new Signin((username) => this.onSignin(username));
         this.signin.appendToElement($('.container'));
         this.gameServer = new GameServer();
-        this.gamesTable = new GamesTable();
+        this.gamesTable = new GamesTable(() => this.onCreateNewGame());
     }
 
     onSignin(userName) {
@@ -24,6 +25,12 @@ export class App {
             .catch(() => console.log('felaa fel fel'));
     }
 
+    onCreateNewGame() {
+        console.log(this.bystander);
+        this.gameServer.createNewGame(this.bystander);
+    }
+
+
     showGamesTable() {
         this.gameServer.loadGames().then((data) => {
             $('.container').empty();
@@ -34,15 +41,15 @@ export class App {
 } 
 
 let app = new App();
-var websocket = new WebSocket('ws://localhost:53274');
-websocket.onopen = function() {
-    console.log('websocket open');
-}
+// var websocket = new WebSocket('ws://localhost:53274');
+// websocket.onopen = function() {
+//     console.log('websocket open');
+// }
 
-websocket.onmessage = function(evt) {
-    console.log(evt);
-}
+// websocket.onmessage = function(evt) {
+//     console.log(evt);
+// }
 
-$('.send').on('click', function() {
-    websocket.send('testing');
-});
+// $('.send').on('click', function() {
+//     websocket.send('testing');
+// });

@@ -10,23 +10,11 @@ namespace Reversio.Server
     [Route("api/[controller]")]
     public class GameController : Controller
     {
-        /*private readonly GameServer _gameServer;
+        private readonly GameServer _gameServer;
 
-        public GameController(GameServer server)
+        public GameController()
         {
-            _gameServer = server;
-        }
-
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
-            return Ok("Ping");
-        }
-
-        public IActionResult CreateNewGame(Bystander bystander)
-        {
-            var game = _gameServer.CreateNewGame(bystander);
-            return Ok(game.CurrentState);
+            _gameServer = GameServer.Instance;
         }
 
         [HttpPost("signin")]
@@ -42,7 +30,7 @@ namespace Reversio.Server
         {
             var games = _gameServer.ActiveGames;
             return Ok(games);
-        }*/
+        }
     }
 
     public class Person

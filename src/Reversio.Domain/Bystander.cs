@@ -7,6 +7,7 @@ namespace Reversio.Domain
         public Bystander(string name)
         {
             Name = name;
+            Id = Guid.NewGuid();
         }
 
         public string Name { get; }
