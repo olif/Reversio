@@ -39,6 +39,10 @@ export class GameServer {
         });
     }
 
+    makeMove(pos) {
+        this.socket.send(JSON.stringify(pos))
+    }
+
     createNewGame() {
         let uri = this.uri;
         let that = this;

@@ -1,20 +1,21 @@
 ﻿export class Board {
-    constructor(gamestate) {
+    constructor(gamestate, onMoveCallback) {
         this.element = this.createElement(gamestate);
+        this.onMoveCallback = onMoveCallback;
     }
 
     createElement(gameState) {
         let html = `
             <table class="board ${gameState.discOfNextMove.color == -1 ? 'board-black-player' : 'board-white-player'}">
 
-            ${gameState.currentState.reduce((rowAcc, row) => {
+            ${gameState.currentState.reduce((rowAcc, row, i) => {
                   return rowAcc += 
                   `<tr>
 
-                    ${row.reduce((colAcc, col) => {
+                    ${row.reduce((colAcc, col, j) => {
                         return colAcc += 
                         `<td>
-                            <span class="disc ${this.getDiscClass(col)}"></span>
+                            <span data-pos-y="${i}" data-pos-x="${j}" class="disc ${this.getDiscClass(col)}"></span>
                         </td>`
                     }, '')}
 
@@ -23,10 +24,17 @@
             </table>
         `;
 
-        let element = $(html);
         $('body').on('click', '.board', (event) => {
-            console.log('click');
+            let element = $(event.target);
+            let x = element.data('pos-x');
+            let y = element.data('pos-y');
+
+            if(x !== undefined && y !== undefined) {
+                this.onMoveCallback({x: x, y: y});
+            }
         })
+
+        let element = $(html);
         return $(html);
     }
 
