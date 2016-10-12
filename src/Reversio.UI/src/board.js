@@ -1,28 +1,43 @@
 ﻿export class Board {
-    constructor() {
-        this.element = this.createElement();
+    constructor(gamestate) {
+        this.element = this.createElement(gamestate);
     }
 
-    createElement() {
-      let html = '<table class="board board-white-player">';
-      for(let i = 1; i <= 8; i++) {
-          html += '<tr>'
-          for(let j = 1; j <= 8; j++) {
-              let discClass = 'disc-none';
-              if((i == 4 && j == 4) || (i == 5 && j == 5)) {
-                  discClass = 'disc-white';
-              } else if((i == 4 && j == 5) || (i == 5 && j == 4)) {
-                  discClass = 'disc-black';
-              }
-              html += `<td data-row="${i}" data-col="${j}"><span class="disc ${discClass}"></span></td>`
-          }
-          html += '</tr>'
-      }
-      html += '</table>';
-      return $(html);
+    createElement(gameState) {
+        let html = `
+            <table class="board ${gameState.discOfNextMove.color == -1 ? 'board-black-player' : 'board-white-player'}">
+
+            ${gameState.currentState.reduce((rowAcc, row) => {
+                  return rowAcc += 
+                  `<tr>
+
+                    ${row.reduce((colAcc, col) => {
+                        return colAcc += 
+                        `<td>
+                            <span class="disc ${this.getDiscClass(col)}"></span>
+                        </td>`
+                    }, '')}
+
+                    </tr>`
+            }, '')}
+            </table>
+        `;
+
+        let element = $(html);
+        $('body').on('click', '.board', (event) => {
+            console.log('click');
+        })
+        return $(html);
+    }
+
+    getDiscClass(nr) {
+        if(nr == -1) return 'disc-black';
+        if(nr == 0) return 'disc-none';
+        if(nr == 1) return 'disc-white';
     }
 
     appendToElement(elem) {
+        console.log(elem);
         elem.append(this.element);
     }
 }

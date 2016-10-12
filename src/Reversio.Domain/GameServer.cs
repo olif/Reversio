@@ -10,7 +10,7 @@ namespace Reversio.Domain
     {
         public static GameServer Instance = new GameServer();
 
-        public IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
+        private readonly IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
 
         public IReadOnlyList<Game> ActiveGames => _activeGames.Values.ToList().AsReadOnly();
 
@@ -19,6 +19,13 @@ namespace Reversio.Domain
         public void RegisterBystander(Bystander bystander)
         {
             ;
+        }
+
+        public GameState CreateNewGame(Bystander bystander)
+        {
+            var game = new Game(bystander);
+            _activeGames.Add(game.GameId, game);
+            return game.CurrentState;
         }
     }
 }

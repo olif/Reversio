@@ -4,6 +4,10 @@ namespace Reversio.Domain
 {
     public class Bystander
     {
+        public Bystander()
+        {
+        }
+
         public Bystander(string name)
         {
             Name = name;

@@ -1,7 +1,8 @@
 import {Board} from './board.js';
 import {Signin} from './signin.js';
-import {GamesTable} from './games-table.js';
+import {IndexPage} from './index.js';
 import {GameServer} from './gameserver.js';
+import {GamePage} from './game-page.js';
 import $ from 'jquery';
 import socketio from 'socketio';
 
@@ -11,7 +12,7 @@ export class App {
         this.signin = new Signin((username) => this.onSignin(username));
         this.signin.appendToElement($('.container'));
         this.gameServer = new GameServer();
-        this.gamesTable = new GamesTable(() => this.onCreateNewGame());
+        this.gamesTable = new IndexPage(() => this.onCreateNewGame());
     }
 
     onSignin(userName) {
@@ -26,10 +27,16 @@ export class App {
     }
 
     onCreateNewGame() {
-        console.log(this.bystander);
-        this.gameServer.createNewGame(this.bystander);
+        this.gameServer
+        .createNewGame()
+        .then((gameState) => this.startGame(gameState));
     }
 
+    startGame() {
+        $('.container').empty();
+        this.gamePage = new GamePage(this.gameServer);
+        this.gamePage.appendToElement($('.container'));
+    }
 
     showGamesTable() {
         this.gameServer.loadGames().then((data) => {

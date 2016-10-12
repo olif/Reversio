@@ -31,6 +31,13 @@ namespace Reversio.Server
             var games = _gameServer.ActiveGames;
             return Ok(games);
         }
+
+        [HttpPost]
+        public IActionResult CreateNewGame(Bystander bystander)
+        {
+            var game = _gameServer.CreateNewGame(bystander);
+            return Ok(game);
+        }
     }
 
     public class Person
@@ -38,3 +45,4 @@ namespace Reversio.Server
         public string Name { get; set; }
     }
 }
+

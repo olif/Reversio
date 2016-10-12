@@ -1,6 +1,6 @@
 import {GameServer} from './gameserver.js';
 
-export class GamesTable {
+export class IndexPage {
     constructor(createNewGameCallback) {
         this.element = this.createElement();
         this.createNewGame = createNewGameCallback;

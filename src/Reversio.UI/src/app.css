@@ -1,4 +1,4 @@
-.board table {
+.game-page table {
     background-color: #339966;
     width: 600px;
     height: 600px;
@@ -6,32 +6,35 @@
     border: 1px solid #206040;
 }
 
-.board-white-player td:hover .disc-none{
+.game-page .board-white-player td:hover .disc-none{
     background: rgba(255, 255, 255, 0.5);
-
 }
 
-.board table td {
+.game-page .board-black-player td:hover .disc-none{
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.game-page table td {
     text-align: center;
     vertical-align: middle;
     border: 1px solid #206040;
 }
 
-.board .disc-none {
+.game-page .disc-none {
     background: none;
 }
 
-.board .disc-black {
+.game-page .disc-black {
     background-color: black;
     box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
 }
 
-.board .disc-white {
+.game-page .disc-white {
     background-color: white;
     box-shadow: inset 0px 0px 0px 2px rgba(0,0,0,0.2);
 }
 
-.board .disc {
+.game-page .disc {
     display: inline-block;
     width: 60px;
     height: 60px;
