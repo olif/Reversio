@@ -33,8 +33,9 @@ namespace Reversio.Server
         }
 
         [HttpPost]
-        public IActionResult CreateNewGame(Bystander bystander)
+        public IActionResult CreateNewGame(MoveModel.BystanderModel model)
         {
+            var bystander = model.ToBystander();
             var game = _gameServer.CreateNewGame(bystander);
             return Ok(game);
         }

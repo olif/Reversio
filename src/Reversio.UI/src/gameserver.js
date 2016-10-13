@@ -19,7 +19,7 @@ export class GameServer {
                     name: username
                 }, function(data) {
                     console.log(data);
-                    this.bystander = data;
+                    that.bystander = data;
                     that.createConnection(data);
                     resolve(data);
                 })
@@ -30,6 +30,7 @@ export class GameServer {
     createConnection(bystander) {
         this.socket = new WebSocket('ws://localhost:53274');
         this.socket.onopen = (e) => console.log(`ws connection open ${e}`);
+        this.socket.onmessage = (e) => console.log(e.data);
     }
 
     loadGames() {
@@ -40,7 +41,14 @@ export class GameServer {
     }
 
     makeMove(pos) {
-        this.socket.send(JSON.stringify(pos))
+        console.log(this);
+        let obj = {
+            bystander: this.bystander,
+            position: pos,
+            gameId: this.gamestate.gameId
+        };
+
+        this.socket.send(JSON.stringify(obj))
     }
 
     createNewGame() {

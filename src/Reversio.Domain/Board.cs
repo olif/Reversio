@@ -72,12 +72,12 @@ namespace Reversio.Domain
         /// </summary>
         /// <param name="move">The position and color of the move</param>
         /// <returns>True if the move was valid/successfull</returns>
-        public bool TryDoMove(Move move)
+        public IReadOnlyList<Position> TryDoMove(Move move)
         {
             var piecesToFlip = GetPiecesToFlipForMove(move);
-            if (piecesToFlip.Count <= 0) return false;
+            if (piecesToFlip.Count <= 0) return null;
             UpdateState(move, piecesToFlip);
-            return true;
+            return piecesToFlip.ToList().AsReadOnly();
         }
 
         /// <summary>

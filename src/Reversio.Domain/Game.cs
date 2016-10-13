@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Reversio.Domain
 {
@@ -13,6 +15,8 @@ namespace Reversio.Domain
         private Disc _discOfNextMove;
         public readonly Board Board;
         public Guid GameId { get; }
+        private IReadOnlyList<Position> _lastPiecesFlipped;
+        private Move _lastValidMove;
 
         public Game(Bystander firstPlayer) : this(firstPlayer, new Board())
         {}
@@ -23,11 +27,15 @@ namespace Reversio.Domain
             Board = board;
             _blackPlayer = new Player(firstPlayer, Disc.Dark);
             _discOfNextMove = Disc.Dark;
+            _lastPiecesFlipped = null;
+            _lastValidMove = null;
         }
 
         public GameState CurrentState => new GameState(GameId, Board, _discOfNextMove);
 
         public event GameFinishedHandler GameFinished;
+
+        public event GameStateChanged GameStateChanged;
 
         public event PlayerJoinedHandler PlayerJoined;
 
@@ -45,27 +53,33 @@ namespace Reversio.Domain
             OnPlayerJoined();
         }
 
-        public bool PlayerMakesMove(Player player, Position position)
+        public IReadOnlyList<Position> PlayerMakesMove(Player player, Position position)
         {
             if (!IsPlayersTurn(player))
             {
-                return false;
+                return null;
             }
 
-            var validMove = Board.TryDoMove(new Move(position, player.Disc));
-            if (!validMove) return false;
+            var move = new Move(position, player.Disc);
+            var piecesToFlip = Board.TryDoMove(move);
+            if (!piecesToFlip.Any())
+            {
+                return null;
+            }
 
             var nextDisc = ToggleDisc(player);
             if (nextDisc == null)
             {
                 OnGameFinished();
-            }
-            else
-            {
-                _discOfNextMove = nextDisc;
+                return null;
             }
 
-            return true;
+            _lastValidMove = move;
+            _lastPiecesFlipped = piecesToFlip;
+            _discOfNextMove = nextDisc;
+
+            OnGameStateChanged();
+            return piecesToFlip;
         }
 
         private Disc ToggleDisc(Player player)
@@ -95,6 +109,11 @@ namespace Reversio.Domain
         private void OnPlayerJoined()
         {
             PlayerJoined?.Invoke(this);
+        }
+
+        public virtual void OnGameStateChanged()
+        {
+            GameStateChanged?.Invoke(this, new GameStateChangedEventArgs(CurrentState));
         }
     }
 }

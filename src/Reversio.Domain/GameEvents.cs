@@ -4,6 +4,18 @@ namespace Reversio.Domain
 {
     public delegate void GameFinishedHandler(object sender, GameFinishedEventArgs e);
 
+    public delegate void GameStateChanged(object sender, GameStateChangedEventArgs e);
+
+    public class GameStateChangedEventArgs
+    {
+        public GameStateChangedEventArgs(GameState currentState)
+        {
+            CurrentState = currentState;
+        }
+
+        public GameState CurrentState { get; set; }
+    }
+
     public class GameFinishedEventArgs : EventArgs
     {
         public GameFinishedEventArgs(GameState currentState)
@@ -13,4 +25,6 @@ namespace Reversio.Domain
 
         public GameState CurrentState { get; }
     }
+
+
 }

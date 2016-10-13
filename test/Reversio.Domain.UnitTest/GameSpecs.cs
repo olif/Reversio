@@ -35,7 +35,7 @@ namespace Reversio.Domain.UnitTest
             var player = game.GetActivePlayer(_blackPlayer.Id);
             var result = game.PlayerMakesMove(player, new Position(4, 5));
 
-            result.Should().BeTrue();
+            result.Should().NotBeNull();
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Reversio.Domain.UnitTest
 
             var result = game.PlayerMakesMove(player, new Position(2, 3));
 
-            result.Should().BeFalse();
+            result.Should().BeNull();
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace Reversio.Domain.UnitTest
             
             var result = game.PlayerMakesMove(player, new Position(5, 2));
 
-            result.Should().BeTrue();
+            result.Should().NotBeNull();
         }
 
         [Fact]

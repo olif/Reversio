@@ -42,7 +42,7 @@ namespace Reversio.Domain.UnitTest
             };
             var expectedBoard = new Board(expectedPositions.Translate());
             Assert.Equal(expectedBoard, board);
-            result.Should().BeTrue();
+            result.Should().NotBeNull();
             board.Should().Be(expectedBoard);
         }
 
@@ -52,7 +52,7 @@ namespace Reversio.Domain.UnitTest
             var board = new Board(DefaultPositions);
             var invalidMove = new Move(4, 7, Disc.Dark);
             var moveResult =  board.TryDoMove(invalidMove);
-            moveResult.Should().BeFalse();
+            moveResult.Should().BeNull();
         }
 
         [Fact]
@@ -183,12 +183,12 @@ namespace Reversio.Domain.UnitTest
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
             }.Translate());
 
-            moveResult1.Should().BeTrue();
-            moveResult2.Should().BeTrue();
-            moveResult3.Should().BeTrue();
-            moveResult4.Should().BeTrue();
-            moveResult5.Should().BeTrue();
-            moveResult6.Should().BeTrue();
+            moveResult1.Should().NotBeNull();
+            moveResult2.Should().NotBeNull();
+            moveResult3.Should().NotBeNull();
+            moveResult4.Should().NotBeNull();
+            moveResult5.Should().NotBeNull();
+            moveResult6.Should().NotBeNull();
             board.Should().Be(expectedBoard);
         }
 

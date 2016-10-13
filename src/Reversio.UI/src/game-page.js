@@ -13,9 +13,6 @@ export class GamePage {
     }
 
     onMoveHandler(pos) {
-        console.log(this);
-        console.log('on move handler');
-        console.log(pos);
         this.gameserver.makeMove(pos);
     }
 
