@@ -17,6 +17,7 @@ namespace Reversio.Domain
         public Guid GameId { get; }
         private IReadOnlyList<Position> _lastPiecesFlipped;
         private Move _lastValidMove;
+        private bool _isGameFinished;
 
         public Game(Bystander firstPlayer) : this(firstPlayer, new Board())
         {}
@@ -29,13 +30,21 @@ namespace Reversio.Domain
             _discOfNextMove = Disc.Dark;
             _lastPiecesFlipped = null;
             _lastValidMove = null;
+            _isGameFinished = false;
         }
 
-        public GameState CurrentState => new GameState(GameId, Board, _discOfNextMove);
+        public GameState CurrentState => new GameState(GameId, 
+            Board, 
+            _discOfNextMove, 
+            _lastPiecesFlipped, 
+            _lastValidMove, 
+            _blackPlayer,
+            _whitePlayer,
+            _isGameFinished);
 
         public event GameFinishedHandler GameFinished;
 
-        public event GameStateChanged GameStateChanged;
+        public event GameStateChangedHandler GameStateChanged;
 
         public event PlayerJoinedHandler PlayerJoined;
 
@@ -70,6 +79,7 @@ namespace Reversio.Domain
             var nextDisc = ToggleDisc(player);
             if (nextDisc == null)
             {
+                _isGameFinished = true;
                 OnGameFinished();
                 return null;
             }

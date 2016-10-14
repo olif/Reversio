@@ -6,7 +6,8 @@ export class GameServer {
         this.uri = 'http://localhost:53274/';
         this.bystander = null;
         this.socket = null;
-        this.gamestate = null;  
+        this.gameState = null;  
+        this.gameStateChangedListeners = [];
     }
 
    signinPlayer(username) {
@@ -26,11 +27,30 @@ export class GameServer {
                 .fail(reject);
         });
     }
+    
+    addGameStateListener(listener) {
+        this.gameStateChangedListeners.push((gameState) => listener(gameState));
+    }
+    
+    onGameStateChanged(gameState) {
+        for(let listener of this.gameStateChangedListeners) {
+            listener(gameState);
+        }
+    }
 
     createConnection(bystander) {
         this.socket = new WebSocket('ws://localhost:53274');
         this.socket.onopen = (e) => console.log(`ws connection open ${e}`);
-        this.socket.onmessage = (e) => console.log(e.data);
+        this.socket.onmessage = (e) => {
+            console.log('message received');
+            console.log(e);
+            let msg = JSON.parse(e.data);
+            switch(msg.messageType) {
+               case 'reversio.gameStateChanged':
+                this.gameState = msg.payload;
+                this.onGameStateChanged(this.gameState);
+            }
+        }
     }
 
     loadGames() {
@@ -41,11 +61,13 @@ export class GameServer {
     }
 
     makeMove(pos) {
-        console.log(this);
         let obj = {
-            bystander: this.bystander,
-            position: pos,
-            gameId: this.gamestate.gameId
+            messageType: 'reversio.move',
+            payload: {
+                bystander: this.bystander,
+                position: pos,
+                gameId: this.gameState.gameId
+            }
         };
 
         this.socket.send(JSON.stringify(obj))
@@ -57,7 +79,7 @@ export class GameServer {
         return new Promise(function(resolve, reject) {
             $.post(uri + 'api/game', 
             that.bystander, function(response) {
-                that.gamestate = response;
+                that.gameState = response;
                 resolve(response);
             }).fail(reject);
         });

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Reversio.Domain;
 using Reversio.WebSockets;
 
@@ -11,24 +12,49 @@ namespace Reversio.Server
     public class WebSocketGameServer : WebSocketServer
     {
         private GameServer _gameServer;
+        private IWebSocketConnection c;
+        private JsonSerializerSettings _jsonSettings;
 
         public WebSocketGameServer(GameServer gameServer)
         {
             _gameServer = gameServer;
+            _gameServer.GameStateChanged += OnGameStateChanged;
+            _jsonSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+        }
+
+        private string ToJson(object o)
+        {
+            return JsonConvert.SerializeObject(o, _jsonSettings);
+        }
+
+        public void OnGameStateChanged(object sender, GameStateChangedEventArgs eventArgs)
+        {
+            var message = Message.GameStateChangedMessage(eventArgs.CurrentState);
+            c.Send(message.ToJson());
         }
 
         public override void OnConnectionOpened(IWebSocketConnection conn)
         {
-            ;
+            c = conn;
         }
 
         public override void OnMessageReceived(IWebSocketConnection conn, string message)
         {
-            var move = JsonConvert.DeserializeObject<MoveModel>(message);
-            var bystander = move.Bystander.ToBystander();
-            var position = move.Position.ToPosition();
-            var result = _gameServer.MakeMove(move.GameId, bystander, position);
-            conn.Send(JsonConvert.SerializeObject(result));
+            var move = JsonConvert.DeserializeObject<Message>(message);
+            switch (move.MessageType)
+            {
+                case Message.MoveType:
+                    var payload = move.Deserialize<MoveModel>();
+                    _gameServer.MakeMove(payload.GameId, payload.Bystander.ToBystander(), payload.Position.ToPosition());
+                    break;
+            }
+            //var bystander = move.Bystander.ToBystander();
+            //var position = move.Position.ToPosition();
+            //var result = _gameServer.MakeMove(move.GameId, bystander, position);
+            //conn.Send(ToJson(result));
         }
 
         public override void OnConnectionClosed(IWebSocketConnection conn)

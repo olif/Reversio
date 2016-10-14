@@ -17,6 +17,8 @@ namespace Reversio.Domain
 
         private GameServer() { }
 
+        public event GameStateChangedHandler GameStateChanged;
+
         public void RegisterBystander(Bystander bystander)
         {
             _bystanders.Add(bystander.Id, bystander);
@@ -25,6 +27,10 @@ namespace Reversio.Domain
         public GameState CreateNewGame(Bystander bystander)
         {
             var game = new Game(bystander);
+            game.GameStateChanged += (e, args) =>
+            {
+                GameStateChanged?.Invoke(this, args);
+            };
             _activeGames.Add(game.GameId, game);
             return game.CurrentState;
         }

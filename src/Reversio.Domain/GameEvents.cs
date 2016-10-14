@@ -4,7 +4,7 @@ namespace Reversio.Domain
 {
     public delegate void GameFinishedHandler(object sender, GameFinishedEventArgs e);
 
-    public delegate void GameStateChanged(object sender, GameStateChangedEventArgs e);
+    public delegate void GameStateChangedHandler(object sender, GameStateChangedEventArgs e);
 
     public class GameStateChangedEventArgs
     {

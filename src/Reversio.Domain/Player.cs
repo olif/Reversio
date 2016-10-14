@@ -9,9 +9,11 @@ namespace Reversio.Domain
         public Player(Bystander participant, Disc disc)
         {
             Disc = disc;
+            Name = participant.Name;
             Id = participant.Id;
         }
 
         public Guid Id { get; internal set; }
+        public string Name { get; set; }
     }
 }

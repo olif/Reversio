@@ -48,15 +48,3 @@ export class App {
 } 
 
 let app = new App();
-// var websocket = new WebSocket('ws://localhost:53274');
-// websocket.onopen = function() {
-//     console.log('websocket open');
-// }
-
-// websocket.onmessage = function(evt) {
-//     console.log(evt);
-// }
-
-// $('.send').on('click', function() {
-//     websocket.send('testing');
-// });
