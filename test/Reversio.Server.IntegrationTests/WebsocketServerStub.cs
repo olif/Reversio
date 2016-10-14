@@ -3,7 +3,7 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server.IntegrationTests
 {
-    public class WebSocketServerStub : WebSocketServer
+    public class WebSocketAgentStub : WebSocketAgent
     {
         public Action<IWebSocketConnection, string> MessageReceived;
 
@@ -11,7 +11,7 @@ namespace Reversio.Server.IntegrationTests
 
         public Action<IWebSocketConnection> ConnectionOpened;
 
-        public WebSocketServerStub()
+        public WebSocketAgentStub(): base(null)
         {
             MessageReceived = (conn, msg) => { };
             ConnectionClosed = (conn) => { };

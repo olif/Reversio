@@ -17,10 +17,10 @@ namespace Reversio.WebSockets
         private CancellationToken _disconnectToken;
         private readonly WebSocket _socket;
         private readonly TaskQueue _taskQueue;
-        internal Action OnOpen { get; set; }
-        internal Action<string> OnMessage { get; set; }
-        internal Action OnClose { get; set; }
-        internal Action<Exception> OnError { get; set; }
+        public Action OnOpen { get; set; }
+        public Action<string> OnMessage { get; set; }
+        public Action OnClose { get; set; }
+        public Action<Exception> OnError { get; set; }
         public Guid Id { get; }
 
         public WebSocketConnection(WebSocket socket, CancellationToken disconnectToken)

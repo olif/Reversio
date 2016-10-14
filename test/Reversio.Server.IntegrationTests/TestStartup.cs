@@ -13,12 +13,12 @@ namespace Reversio.Server.IntegrationTests
 {
     public class TestStartup
     {
-        public static WebSocketServerStub Server = new WebSocketServerStub();
+        public static WebSocketAgentStub Server = new WebSocketAgentStub();
 
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddSingleton<WebSocketServer>(Server);
+            services.AddSingleton<WebSocketServer>(new WebSocketServer(null));
 
         }
 

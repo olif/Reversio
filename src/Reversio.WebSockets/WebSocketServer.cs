@@ -8,21 +8,18 @@ using Microsoft.AspNetCore.Http;
 
 namespace Reversio.WebSockets
 {
-    public abstract class WebSocketServer
+    public class WebSocketServer
     {
-        private readonly IDictionary<Guid, IWebSocketConnection> _activeConnections = 
-            new ConcurrentDictionary<Guid, IWebSocketConnection>();
+        private IWebSocketAgentFactory _agentFactory;
+        //private void OnCloseInternal(IWebSocketConnection connection)
+        //{
+        //    _activeConnections.Remove(connection.Id);
+        //    OnConnectionClosed(connection);
+        //}
 
-        public abstract void OnMessageReceived(IWebSocketConnection conn, string message);
-
-        public abstract void OnConnectionClosed(IWebSocketConnection conn);
-
-        public abstract void OnConnectionOpened(IWebSocketConnection conn);
-
-        private void OnCloseInternal(IWebSocketConnection connection)
+        public WebSocketServer(IWebSocketAgentFactory agentFactory)
         {
-            _activeConnections.Remove(connection.Id);
-            OnConnectionClosed(connection);
+            _agentFactory = agentFactory;
         }
 
         internal async Task ProcessRequest(HttpContext context)
@@ -32,11 +29,7 @@ namespace Reversio.WebSockets
                 var socket = await context.WebSockets.AcceptWebSocketAsync(subProtocol: null);
 
                 var connection = new WebSocketConnection(socket, CancellationToken.None);
-                connection.OnOpen = () => OnConnectionOpened(connection);
-                connection.OnMessage = (msg) => OnMessageReceived(connection, msg);
-                connection.OnClose = () => OnCloseInternal(connection);
-
-                _activeConnections.Add(connection.Id, connection);
+                _agentFactory.Create(context, connection);
                 await connection.ProcessRequest(CancellationToken.None);
             }
             catch (Exception)
@@ -47,5 +40,10 @@ namespace Reversio.WebSockets
                 throw;
             }
         }
+    }
+
+    public interface IWebSocketAgentFactory
+    {
+        WebSocketAgent Create(HttpContext context, IWebSocketConnection connection);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Reversio.Domain;
@@ -9,13 +10,13 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server
 {
-    public class WebSocketGameServer : WebSocketServer
+    public class WebSocketGameAgent : WebSocketAgent
     {
-        private GameServer _gameServer;
+        private static GameServer _gameServer;
         private IWebSocketConnection c;
         private JsonSerializerSettings _jsonSettings;
 
-        public WebSocketGameServer(GameServer gameServer)
+        public WebSocketGameAgent(GameServer gameServer, HttpContext context) : base(context)
         {
             _gameServer = gameServer;
             _gameServer.GameStateChanged += OnGameStateChanged;
@@ -51,10 +52,6 @@ namespace Reversio.Server
                     _gameServer.MakeMove(payload.GameId, payload.Bystander.ToBystander(), payload.Position.ToPosition());
                     break;
             }
-            //var bystander = move.Bystander.ToBystander();
-            //var position = move.Position.ToPosition();
-            //var result = _gameServer.MakeMove(move.GameId, bystander, position);
-            //conn.Send(ToJson(result));
         }
 
         public override void OnConnectionClosed(IWebSocketConnection conn)

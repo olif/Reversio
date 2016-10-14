@@ -11,6 +11,11 @@ namespace Reversio.WebSockets
 
         Task Send(string message);
 
+        Action OnOpen { get; set; }
+        Action<string> OnMessage { get; set; }
+        Action OnClose { get; set; }
+        Action<Exception> OnError { get; set; }
+
         Task CloseConnection();
     }
 }
