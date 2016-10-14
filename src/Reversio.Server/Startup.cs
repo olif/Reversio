@@ -47,7 +47,7 @@ namespace Reversio.Server
             app.UseDeveloperExceptionPage();
             app.UseCors("AllowAll");
             app.UseWebSockets();
-            app.UseWebSocketServer(new WebSocketServer(new WebSocketAgentFactory()));
+            app.UseWebSocketServer(new WebSocketServer(new WebSocketGameBrokerFactory()));
             app.UseMvc();
         }
     }

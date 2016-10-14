@@ -10,14 +10,14 @@ namespace Reversio.WebSockets
 {
     public class WebSocketServer
     {
-        private IWebSocketAgentFactory _agentFactory;
+        private IWebSocketBrokerFactory _agentFactory;
         //private void OnCloseInternal(IWebSocketConnection connection)
         //{
         //    _activeConnections.Remove(connection.Id);
         //    OnConnectionClosed(connection);
         //}
 
-        public WebSocketServer(IWebSocketAgentFactory agentFactory)
+        public WebSocketServer(IWebSocketBrokerFactory agentFactory)
         {
             _agentFactory = agentFactory;
         }
@@ -42,8 +42,8 @@ namespace Reversio.WebSockets
         }
     }
 
-    public interface IWebSocketAgentFactory
+    public interface IWebSocketBrokerFactory
     {
-        WebSocketAgent Create(HttpContext context, IWebSocketConnection connection);
+        WebSocketBroker Create(HttpContext context, IWebSocketConnection connection);
     }
 }

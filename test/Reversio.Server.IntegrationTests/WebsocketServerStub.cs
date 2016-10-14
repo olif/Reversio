@@ -3,7 +3,7 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server.IntegrationTests
 {
-    public class WebSocketAgentStub : WebSocketAgent
+    public class WebSocketAgentStub : WebSocketBroker
     {
         public Action<IWebSocketConnection, string> MessageReceived;
 

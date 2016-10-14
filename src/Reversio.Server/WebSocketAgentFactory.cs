@@ -8,11 +8,11 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server
 {
-    public class WebSocketAgentFactory : IWebSocketAgentFactory
+    public class WebSocketGameBrokerFactory : IWebSocketBrokerFactory
     {
-        public WebSocketAgent Create(HttpContext context, IWebSocketConnection connection)
+        public WebSocketBroker Create(HttpContext context, IWebSocketConnection connection)
         {
-            var agent = new WebSocketGameAgent(GameServer.Instance, context);
+            var agent = new WebSocketGameBroker(GameServer.Instance, context);
             connection.OnOpen += () => agent.OnConnectionOpened(connection);
             connection.OnClose += () => agent.OnConnectionClosed(connection);
             connection.OnMessage += (msg) => agent.OnMessageReceived(connection, msg);

@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace Reversio.WebSockets
 {
-    public abstract class WebSocketAgent
+    public abstract class WebSocketBroker
     {
         protected HttpContext Context;
-        protected WebSocketAgent(HttpContext context)
+        protected WebSocketBroker(HttpContext context)
         {
             Context = context;
         }

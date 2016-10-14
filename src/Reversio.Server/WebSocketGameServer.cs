@@ -10,13 +10,13 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server
 {
-    public class WebSocketGameAgent : WebSocketAgent
+    public class WebSocketGameBroker : WebSocketBroker
     {
         private static GameServer _gameServer;
         private IWebSocketConnection c;
         private JsonSerializerSettings _jsonSettings;
 
-        public WebSocketGameAgent(GameServer gameServer, HttpContext context) : base(context)
+        public WebSocketGameBroker(GameServer gameServer, HttpContext context) : base(context)
         {
             _gameServer = gameServer;
             _gameServer.GameStateChanged += OnGameStateChanged;
