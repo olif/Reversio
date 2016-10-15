@@ -15,7 +15,7 @@ namespace Reversio.Server.IntegrationTests
         {
             MessageReceived = (conn, msg) => { };
             ConnectionClosed = (conn) => { };
-            ConnectionOpened = (conn) => { };
+           ConnectionOpened = (conn) => { };
         }
 
         public override void OnMessageReceived(IWebSocketConnection conn, string message)

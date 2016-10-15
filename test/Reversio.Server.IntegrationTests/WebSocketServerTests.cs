@@ -21,7 +21,7 @@ namespace Reversio.Server.IntegrationTests
         {
             var testServer = new TestServer(new WebHostBuilder().UseStartup<TestStartup>());
             _client = testServer.CreateWebSocketClient();
-            _stub = TestStartup.Server;
+            _stub = WebSocketBrokerFactoryStub.Instace;
         }
 
         [Fact]
