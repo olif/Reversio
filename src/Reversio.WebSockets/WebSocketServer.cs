@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -10,16 +7,11 @@ namespace Reversio.WebSockets
 {
     public class WebSocketServer
     {
-        private IWebSocketBrokerFactory _agentFactory;
-        //private void OnCloseInternal(IWebSocketConnection connection)
-        //{
-        //    _activeConnections.Remove(connection.Id);
-        //    OnConnectionClosed(connection);
-        //}
+        private readonly WebSocketBrokerFactory _brokerFactory;
 
-        public WebSocketServer(IWebSocketBrokerFactory agentFactory)
+        public WebSocketServer(WebSocketBrokerFactory agentFactory)
         {
-            _agentFactory = agentFactory;
+            _brokerFactory = agentFactory;
         }
 
         internal async Task ProcessRequest(HttpContext context)
@@ -29,7 +21,7 @@ namespace Reversio.WebSockets
                 var socket = await context.WebSockets.AcceptWebSocketAsync(subProtocol: null);
 
                 var connection = new WebSocketConnection(socket, CancellationToken.None);
-                _agentFactory.Create(context, connection);
+                _brokerFactory.AfterCreate(context, connection);
                 await connection.ProcessRequest(CancellationToken.None);
             }
             catch (Exception)
@@ -42,8 +34,4 @@ namespace Reversio.WebSockets
         }
     }
 
-    public interface IWebSocketBrokerFactory
-    {
-        WebSocketBroker Create(HttpContext context, IWebSocketConnection connection);
-    }
 }

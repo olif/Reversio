@@ -15,7 +15,7 @@ namespace Reversio.Server.IntegrationTests
     public class WebSocketServerTests
     {
         private readonly WebSocketClient _client;
-        private readonly WebSocketAgentStub _stub;
+        private readonly WebSocketBrokerStub _stub;
 
         public WebSocketServerTests()
         {

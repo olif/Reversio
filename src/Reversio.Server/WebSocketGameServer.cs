@@ -16,7 +16,7 @@ namespace Reversio.Server
         private IWebSocketConnection c;
         private JsonSerializerSettings _jsonSettings;
 
-        public WebSocketGameBroker(GameServer gameServer, HttpContext context) : base(context)
+        public WebSocketGameBroker(GameServer gameServer)
         {
             _gameServer = gameServer;
             _gameServer.GameStateChanged += OnGameStateChanged;

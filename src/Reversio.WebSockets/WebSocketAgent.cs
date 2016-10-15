@@ -8,10 +8,10 @@ namespace Reversio.WebSockets
 {
     public abstract class WebSocketBroker
     {
-        protected HttpContext Context;
-        protected WebSocketBroker(HttpContext context)
+        public HttpContext Context;
+
+        protected WebSocketBroker()
         {
-            Context = context;
         }
 
         public abstract void OnMessageReceived(IWebSocketConnection conn, string message);
