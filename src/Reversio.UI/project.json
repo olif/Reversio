@@ -1,0 +1,11 @@
+{
+  "name": "reversio",
+  "frameworks": {
+    "netcoreapp1.6": {
+    }
+  },
+  "runtimes": {
+    "win81-x64": {}
+  }
+
+}

@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "dependencies": {
+    "Microsoft.AspNetCore.WebSockets": "0.2.0-preview1-final"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+    }
+  },
+
+  "runtimes": {
+    "win81-x64": {},
+    "osx.10.12-x64": {}
+  }
+}

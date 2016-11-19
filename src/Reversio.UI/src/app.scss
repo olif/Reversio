@@ -1,0 +1,86 @@
+.game-page {
+
+    .game-container {
+        top: 50px;
+        width: 600px;
+        height: 600px;
+        margin: 0 auto;
+        position: relative;
+    
+    
+        .standings-container {
+            text-size: 1.5em;
+            font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        position: absolute;
+        width: 300px;
+        left: -320px;
+        text-align: right;
+        
+        > span {
+            display: block;
+        }
+        
+        .disc {
+            height: 8px;
+            width: 8px;
+            line-height: 20px;
+            margin-left: 20px;
+            border-radius: 20px;
+            border: 1px solid black;
+            background-color: white;
+            display: inline-block;
+        }
+    }
+    
+   table {
+    background-color: #339966;
+    width: 600px;
+    height: 600px;
+    border-collapse: collapse;
+    border: 1px solid #206040;
+
+
+    &.board-white-player td:hover .disc-none{
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    &.board-black-player td:hover .disc-none{
+        background: rgba(0, 0, 0, 0.5);
+    }
+    
+    td {
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #206040;
+        
+        .disc-none {
+            background: none;
+        }
+        
+        .disc-black {
+            background: black;
+            box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
+        }
+        
+        .disc-white {
+            background: white;
+            box-shadow: inset 0px 0px 0px 2px rgba(0,0,0,0.2);
+        }
+        
+        .disc {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            margin: 6px;
+            border-radius: 60px;
+        }
+    }
+}
+    }
+}
+
+
+
+
+

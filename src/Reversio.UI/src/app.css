@@ -1,0 +1,43 @@
+.game-page table {
+    background-color: #339966;
+    width: 600px;
+    height: 600px;
+    border-collapse: collapse;
+    border: 1px solid #206040;
+}
+
+.game-page .board-white-player td:hover .disc-none{
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.game-page .board-black-player td:hover .disc-none{
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.game-page table td {
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #206040;
+}
+
+.game-page .disc-none {
+    background: none;
+}
+
+.game-page .disc-black {
+    background-color: black;
+    box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
+}
+
+.game-page .disc-white {
+    background-color: white;
+    box-shadow: inset 0px 0px 0px 2px rgba(0,0,0,0.2);
+}
+
+.game-page .disc {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    margin: 6px;
+    border-radius: 60px;
+}
