@@ -4,15 +4,15 @@
     {
         public Position Position { get; }
 
-        public Move(Position position, Disc disc)
+        public Move(Position position, DiscColor disc)
         {
             Position = position;
             Disc = disc;
         }
-        public Move(int x, int y, Disc color) : this(new Position(x, y), color)
+        public Move(int x, int y, DiscColor color) : this(new Position(x, y), color)
         {
         }
 
-        public Disc Disc { get; }
+        public DiscColor Disc { get; }
     }
 }

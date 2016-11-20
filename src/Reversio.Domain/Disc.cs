@@ -5,14 +5,12 @@ using System.Threading.Tasks;
 
 namespace Reversio.Domain
 {
-    public class Disc
+    public class DiscColor
     {
+        public static DiscColor Black = new DiscColor(-1);
+        public static DiscColor White = new DiscColor(1);
 
-        public static Disc Dark = new Disc(-1);
-        public static Disc None = new Disc(0);
-        public static Disc Light = new Disc(1);
-
-        private Disc(int color)
+        private DiscColor(int color)
         {
             Color = color;
         }

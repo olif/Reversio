@@ -2,28 +2,28 @@
 
 namespace Reversio.Domain
 {
-    public abstract class Player : Participant
+    public abstract class ActivePlayer : Player 
     {
-        protected Player(Guid id, string name, Disc disc) : base(id, name)
+        protected ActivePlayer(string name, DiscColor disc) : base(name)
         {
             Disc = disc;
         }
 
-        public Disc Disc { get; }
+        public DiscColor Disc { get; }
     }
 
-    public class BlackPlayer : Player
+    public class BlackPlayer : ActivePlayer
     {
-        public BlackPlayer(Guid id, string name)
-            :base(id, name, Disc.Dark)
+        public BlackPlayer(string name)
+            :base(name, DiscColor.Black)
         {
         }
     }
 
-    public class WhitePlayer : Player
+    public class WhitePlayer : ActivePlayer
     {
-        public WhitePlayer(Guid id, string name)
-            : base(id, name, Disc.Light)
+        public WhitePlayer(string name)
+            : base(name, DiscColor.White)
         {
         }
     }

@@ -11,7 +11,7 @@ namespace Reversio.Domain
         public GameState(
             Guid gameId,
             Board board,
-            Disc discOfNextMove,
+            DiscColor discOfNextMove,
             IReadOnlyList<Position> discsFlipped,
             Move lastValidMove,
             BlackPlayer blackPlayer,
@@ -54,7 +54,7 @@ namespace Reversio.Domain
 
         public IReadOnlyList<Position> DiscsFlipped { get; }
 
-        public Disc DiscOfNextMove { get; }
+        public DiscColor DiscOfNextMove { get; }
 
         public bool IsGameFinished { get; }
 

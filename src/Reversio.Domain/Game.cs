@@ -13,13 +13,13 @@ namespace Reversio.Domain
     {
         private readonly BlackPlayer _blackPlayer;
         private WhitePlayer _whitePlayer;
-        private Disc _discOfNextMove;
+        private DiscColor _discOfNextMove;
         public readonly Board Board;
         public Guid GameId { get; }
         private IReadOnlyList<Position> _lastPiecesFlipped;
         private Move _lastValidMove;
         private bool _isGameFinished;
-        private readonly ICollection<Participant> _observers;
+        private readonly ICollection<Player> _observers;
 
         public Game(BlackPlayer player) : this(player, new Board())
         {}
@@ -29,12 +29,12 @@ namespace Reversio.Domain
             GameId = Guid.NewGuid();
             Board = board;
             _blackPlayer = player;
-            _discOfNextMove = Disc.Dark;
+            _discOfNextMove = DiscColor.Black;
             _lastPiecesFlipped = null;
             _lastValidMove = null;
             _isGameFinished = false;
 
-            _observers = new List<Participant>();
+            _observers = new List<Player>();
             _observers.Add(player);
         }
 
@@ -62,26 +62,27 @@ namespace Reversio.Domain
             OnPlayerJoined();
         }
 
-        public void JoinObserver(Participant observer)
+        public void JoinObserver(Player observer)
         {
             _observers.Add(observer);
         }
 
         public IReadOnlyList<Position> PlayerMakesMove(Player player, Position position)
         {
-            if (!IsPlayersTurn(player))
+            var activePlayer = GetActivePlayer(player);
+            if (!IsPlayersTurn(activePlayer))
             {
                 return null;
             }
 
-            var move = new Move(position, player.Disc);
+            var move = new Move(position, activePlayer.Disc);
             var piecesToFlip = Board.TryDoMove(move);
             if (piecesToFlip == null || piecesToFlip.Count == 0)
             {
                 return null;
             }
 
-            var nextDisc = ToggleDisc(player);
+            var nextDisc = ToggleDisc(activePlayer);
             if (nextDisc == null)
             {
                 _isGameFinished = true;
@@ -95,9 +96,9 @@ namespace Reversio.Domain
             return piecesToFlip;
         }
 
-        private Disc ToggleDisc(Player player)
+        private DiscColor ToggleDisc(ActivePlayer player)
         {
-            var opponentsDisc = player.Disc == Disc.Dark ? Disc.Light : Disc.Dark;
+            var opponentsDisc = player.Disc == DiscColor.Black ? DiscColor.White : DiscColor.Black;
             if (Board.HasMoves(opponentsDisc))
             {
                 return opponentsDisc;
@@ -110,12 +111,12 @@ namespace Reversio.Domain
             return null;
         }
 
-        private bool IsPlayersTurn(Player player) => player.Disc == _discOfNextMove;
+        private bool IsPlayersTurn(ActivePlayer player) => player.Disc == _discOfNextMove;
 
-        public Player GetActivePlayer(Guid playerId)
+        public ActivePlayer GetActivePlayer(Player player)
         {
-            if(playerId == _blackPlayer.Id) return _blackPlayer;
-            if(playerId == _whitePlayer.Id) return _whitePlayer;
+            if (player.Name == _blackPlayer.Name) return _blackPlayer;
+            if (player.Name == _whitePlayer.Name) return _whitePlayer;
             throw new ArgumentException("The participant is not a player in this game");
         }
 
@@ -126,9 +127,9 @@ namespace Reversio.Domain
 
         public virtual void OnGameStateChanged()
         {
-            foreach (var observer in _observers)
+            foreach (var participant in _observers)
             {
-                GameStateChanged?.Invoke(this, observer.Id, new GameStateChangedEventArgs(CurrentState));
+                GameStateChanged?.Invoke(this, participant, new GameStateChangedEventArgs(CurrentState));
             }
         }
     }

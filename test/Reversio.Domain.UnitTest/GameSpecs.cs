@@ -13,8 +13,8 @@ namespace Reversio.Domain.UnitTest
 
         public GameSpecs()
         {
-            _blackPlayer = new BlackPlayer(Guid.NewGuid(), "player1");
-            _whitePlayer = new WhitePlayer(Guid.NewGuid(), "player2");
+            _blackPlayer = new BlackPlayer("player1");
+            _whitePlayer = new WhitePlayer("player2");
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace Reversio.Domain.UnitTest
             var game = new Game(_blackPlayer);
             game.JoinOpponent(_whitePlayer);
 
-            Action action = () => game.JoinOpponent(new WhitePlayer(Guid.NewGuid(), "player"));
+            Action action = () => game.JoinOpponent(new WhitePlayer("player"));
 
             action.ShouldThrow<InvalidOperationException>();
         }
@@ -32,8 +32,7 @@ namespace Reversio.Domain.UnitTest
         public void BlackPlayer_CanMakeMove_BeforeOpponentHasJoined()
         {
             var game = new Game(_blackPlayer);
-            var player = game.GetActivePlayer(_blackPlayer.Id);
-            var result = game.PlayerMakesMove(player, new Position(4, 5));
+            var result = game.PlayerMakesMove(_blackPlayer, new Position(4, 5));
 
             result.Should().NotBeNull();
         }
@@ -42,10 +41,9 @@ namespace Reversio.Domain.UnitTest
         public void Player_Cannot_Make_Multiple_Moves_If_There_Is_A_Valid_Move_For_Opponent()
         {
             var game = new Game(_blackPlayer);
-            var player = game.GetActivePlayer(_blackPlayer.Id);
-            game.PlayerMakesMove(player, new Position(4, 5));
+            game.PlayerMakesMove(_blackPlayer, new Position(4, 5));
 
-            var result = game.PlayerMakesMove(player, new Position(2, 3));
+            var result = game.PlayerMakesMove(_blackPlayer, new Position(2, 3));
 
             result.Should().BeNull();
         }
@@ -76,10 +74,9 @@ namespace Reversio.Domain.UnitTest
             var board = new Board(positions.Translate());
             var game = new Game(_blackPlayer, board);
             game.JoinOpponent(_whitePlayer);
-            var player = game.GetActivePlayer(_blackPlayer.Id);
-            game.PlayerMakesMove(player, new Position(5, 0));
+            game.PlayerMakesMove(_blackPlayer, new Position(5, 0));
             
-            var result = game.PlayerMakesMove(player, new Position(5, 2));
+            var result = game.PlayerMakesMove(_blackPlayer, new Position(5, 2));
 
             result.Should().NotBeNull();
         }
@@ -110,13 +107,12 @@ namespace Reversio.Domain.UnitTest
 
             var board = new Board(positions.Translate());
             var game = new Game(_blackPlayer, board);
-            var player = game.GetActivePlayer(_blackPlayer.Id);
             game.JoinOpponent(_whitePlayer);
             game.GameStateChanged += (o, observerId, e) =>
             {
                 gameFinished = e.CurrentState.IsGameFinished;
             };
-            game.PlayerMakesMove(player, new Position(0, 3));
+            game.PlayerMakesMove(_blackPlayer, new Position(0, 3));
 
             gameFinished.Should().BeTrue();
         }

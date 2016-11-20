@@ -19,7 +19,7 @@ namespace Reversio.Domain.UnitTest
         public void Placing_Disc_On_Valid_Position_Updates_Board_Positions()
         {
             var board = new Board(DefaultPositions);
-            var move1 = new Move(4, 5, Disc.Dark);
+            var move1 = new Move(4, 5, DiscColor.Black);
             var result = board.TryDoMove(move1);
 
             var expectedPositions = new char[8, 8]
@@ -50,7 +50,7 @@ namespace Reversio.Domain.UnitTest
         public void Placing_Disc_On_Invalid_Position_Returns_False()
         {
             var board = new Board(DefaultPositions);
-            var invalidMove = new Move(4, 7, Disc.Dark);
+            var invalidMove = new Move(4, 7, DiscColor.Black);
             var moveResult =  board.TryDoMove(invalidMove);
             moveResult.Should().BeNull();
         }
@@ -79,7 +79,7 @@ namespace Reversio.Domain.UnitTest
 
             var board = new Board(positions.Translate());
 
-            var hasMoves = board.HasMoves(Disc.Dark);
+            var hasMoves = board.HasMoves(DiscColor.Black);
             hasMoves.Should().BeTrue();
         }
 
@@ -107,7 +107,7 @@ namespace Reversio.Domain.UnitTest
 
             var board = new Board(positions.Translate());
 
-            var hasMoves = board.HasMoves(Disc.Dark);
+            var hasMoves = board.HasMoves(DiscColor.Black);
             hasMoves.Should().BeFalse();
         }
 
@@ -150,12 +150,12 @@ namespace Reversio.Domain.UnitTest
         public void TryDoMove_Sets_The_Board_In_Correct_State()
         {
             var board = new Board(DefaultPositions);
-            var move1 = new Move(3, 2, Disc.Dark);
-            var move2 = new Move(2, 4, Disc.Light);
-            var move3 = new Move(3, 5, Disc.Dark);
-            var move4 = new Move(4, 2, Disc.Light);
-            var move5 = new Move(5, 2, Disc.Dark);
-            var move6 = new Move(5, 3, Disc.Light);
+            var move1 = new Move(3, 2, DiscColor.Black);
+            var move2 = new Move(2, 4, DiscColor.White);
+            var move3 = new Move(3, 5, DiscColor.Black);
+            var move4 = new Move(4, 2, DiscColor.White);
+            var move5 = new Move(5, 2, DiscColor.Black);
+            var move6 = new Move(5, 3, DiscColor.White);
 
             var moveResult1 = board.TryDoMove(move1);
             var moveResult2 = board.TryDoMove(move2);

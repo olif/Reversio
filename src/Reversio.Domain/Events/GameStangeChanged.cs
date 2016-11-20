@@ -2,7 +2,7 @@
 
 namespace Reversio.Domain.Events
 {
-    public delegate void GameStateChangedHandler(object sender, Guid observerId, GameStateChangedEventArgs e);
+    public delegate void GameStateChangedHandler(object sender, Player participant, GameStateChangedEventArgs e);
 
     public class GameStateChangedEventArgs
     {

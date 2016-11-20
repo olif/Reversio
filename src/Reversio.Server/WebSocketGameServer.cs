@@ -17,7 +17,7 @@ namespace Reversio.Server
         /// <summary>
         /// All sessions with corresponding connection
         /// </summary>
-        private readonly IDictionary<Guid, IWebSocketConnection> _sessions = new ConcurrentDictionary<Guid, IWebSocketConnection>();
+        private readonly IDictionary<string, IWebSocketConnection> _sessions = new ConcurrentDictionary<string, IWebSocketConnection>();
 
         public WebSocketGameServer(GameServer gameServer)
         {
@@ -27,10 +27,10 @@ namespace Reversio.Server
             _gameServer.GameStarted += OnGameStarted;
         }
 
-        private void OnGameStarted(object sender, Guid observerId, GameStartedEventArgs eventargs)
+        private void OnGameStarted(object sender, Participant participant, GameStartedEventArgs eventargs)
         {
             IWebSocketConnection conn;
-            if (_sessions.TryGetValue(observerId, out conn))
+            if (_sessions.TryGetValue(participant.Name, out conn))
             {
                 var msg = Message.GameStarted(eventargs);
                 conn.Send(msg.ToJson());
@@ -46,11 +46,11 @@ namespace Reversio.Server
             }
         }
 
-        public void OnGameStateChanged(object sender, Guid participantId, GameStateChangedEventArgs eventArgs)
+        public void OnGameStateChanged(object sender, Participant participant, GameStateChangedEventArgs eventArgs)
         {
             IWebSocketConnection connection;
             var message = Message.GameStateChangedMessage(eventArgs);
-            if (_sessions.TryGetValue(participantId, out connection))
+            if (_sessions.TryGetValue(participant.Name, out connection))
             {
                 connection.Send(message.ToJson());
             }
@@ -59,8 +59,7 @@ namespace Reversio.Server
         public override void OnConnectionOpened(IWebSocketConnection conn, IQueryCollection query)
         {
             var participantName = query["name"];
-            var participantId = query["sessionId"];
-            _sessions.Add(Guid.Parse(participantId), conn);
+            _sessions.Add(participantName, conn);
         }
 
         public override void OnMessageReceived(IWebSocketConnection conn, string message)
@@ -70,7 +69,7 @@ namespace Reversio.Server
             {
                 case MessageType.Move:
                     var movePayload = move.Deserialize<MoveModel>();
-                    _gameServer.MakeMove(movePayload.GameId, movePayload.Bystander.Id, movePayload.Position.ToPosition());
+                    _gameServer.MakeMove(movePayload.GameId, movePayload.Bystander.Name, movePayload.Position.ToPosition());
                     break;
 
                 case MessageType.StartGameWithRandomPlayer:

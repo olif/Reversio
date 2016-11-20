@@ -85,7 +85,7 @@ namespace Reversio.Domain
         /// </summary>
         /// <param name="disc">The disc to check for</param>
         /// <returns>True if there exists any valid moves for the disc, false otherwise</returns>
-        public bool HasMoves(Disc disc)
+        public bool HasMoves(DiscColor disc)
         {
             for (var i = 0; i < EdgeSize; i++)
             {
