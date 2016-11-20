@@ -1,10 +1,12 @@
 ﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reversio.Domain;
 
 namespace Reversio.Server
 {
     [Route("api/[controller]")]
+    [Authorize]
     public class GamesController : Controller
     {
         private readonly GameServer _gameServer;
@@ -12,6 +14,12 @@ namespace Reversio.Server
         public GamesController()
         {
             _gameServer = GameServer.Instance;
+        }
+
+        [HttpGet("user")]
+        public IActionResult GetUser()
+        {
+            return Ok(User.Identity.Name);
         }
 
         [HttpPost("signin")]

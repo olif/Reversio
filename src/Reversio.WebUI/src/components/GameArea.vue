@@ -28,7 +28,7 @@
      }
    },
    beforeMount () {
-     this.$store.dispatch('loadGames')
+     this.$store.dispatch('LOAD_GAMES')
    }
  }
 </script>

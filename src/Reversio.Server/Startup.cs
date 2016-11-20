@@ -1,10 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Reversio.Domain;
+using Reversio.Server.Auth;
 using Reversio.WebSockets;
 
 namespace Reversio.Server
@@ -46,6 +53,35 @@ namespace Reversio.Server
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             app.UseCors("AllowAll");
+
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("testtesttestteststestsss"));
+           
+            app.UseJwtBearerAuthentication(new JwtBearerOptions()
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                TokenValidationParameters = new TokenValidationParameters()
+                {
+                    IssuerSigningKey = signingKey,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "reversio",
+                    ValidateIssuer = true,
+                    ValidAudience = "test",
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                },
+            });
+
+            app.UseMiddleware<TokenProviderMiddleware>(Options.Create(new TokenProviderOptions()
+            {
+                Audience = "test",
+                Issuer = "reversio",
+                Path = "/api/token",
+                Expiration = TimeSpan.FromDays(1),
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
+            }));
+
             app.UseWebSockets();
             app.UseWebSocketServer(new WebSocketGameServer(GameServer.Instance));
             app.UseMvc();

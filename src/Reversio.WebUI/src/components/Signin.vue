@@ -14,10 +14,19 @@
                 <i class="user icon"></i>
                 <input type="text" v-model="username" name="username" placeholder="Name">
               </div>
+              </div>
+             <div class="field">
+                <div class="ui left icon input">
+                  <i class="lock icon"></i>
+                  <input type="password" v-model="password" name="password" placeholder="Password" />
+                </div>
             </div>
-            <button type="submit" class="ui fluid large teal submit button">Sign in</button>
+            <button type="submit" class="ui fluid large teal submit button" disabled>Sign in</button>
           </div>
           <div class="ui error message"></div>
+          <div class="ui segment">
+            <button type="button" @click="signinAsGuest()" class="ui fluid large pink submit button">Sign in as guest</button>
+           </div>
         </form>
       </div>
     </div>
@@ -28,7 +37,8 @@
  export default {
    data: function () {
      return {
-       username: ''
+       username: '',
+       password: ''
      }
    },
    methods: {
@@ -38,6 +48,14 @@
          this.$router.push('hello')
        })
        .catch(() => console.log('uh oh'))
+     },
+
+     signinAsGuest (e) {
+       this.$store.dispatch('SIGN_IN_AS_GUEST')
+       .then(() => {
+         this.$router.push('gamearea')
+       })
+       console.log('signing in as guest')
      }
    }
  }

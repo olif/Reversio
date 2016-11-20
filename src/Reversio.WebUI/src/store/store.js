@@ -37,6 +37,20 @@ const store = new Vuex.Store({
       })
     },
 
+    SIGN_IN_AS_GUEST: function ({ commit }) {
+      return new Promise((resolve, reject) => {
+        api.signinAsGuest()
+          .then((token) => {
+            console.log(token)
+            resolve()
+          })
+          .catch((error) => {
+            console.log('det sket sig')
+            reject(error)
+          })
+      })
+    },
+
     LOAD_GAMES: function ({commit}) {
       api.loadGames()
         .then((games) => {
