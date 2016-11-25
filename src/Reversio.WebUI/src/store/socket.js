@@ -5,9 +5,9 @@ export default class GameSocketHandler {
     this.store = store
   }
 
-  connect (userId) {
-    this.userId = userId
-    this.socket = new WebSocket(`ws://localhost:53274?sessionId=${userId}`)
+  connect (token) {
+    this.token = token
+    this.socket = new WebSocket(`ws://localhost:53274`)
     this.socket.onopen = (e) => console.log('ws connection open')
     this.socket.onmessage = (e) => this.dispatchMessage(e)
   }
@@ -43,9 +43,7 @@ export default class GameSocketHandler {
     let msg = {
       messageType: 'reversio.event.startGameWithRandomPlayer',
       payload: {
-        bystander: {
-          id: this.userId
-        }
+        name: 'this.userIdtest'
       }
     }
     this.socket.send(JSON.stringify(msg))

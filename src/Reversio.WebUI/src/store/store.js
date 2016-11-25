@@ -42,6 +42,8 @@ const store = new Vuex.Store({
         api.signinAsGuest()
           .then((token) => {
             console.log(token)
+            document.cookie = `access_token=${token}`
+            socketHandler.connect(token)
             resolve()
           })
           .catch((error) => {

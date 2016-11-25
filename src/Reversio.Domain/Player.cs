@@ -2,7 +2,7 @@
 
 namespace Reversio.Domain
 {
-    public abstract class ActivePlayer : Player 
+    public abstract class ActivePlayer : Player
     {
         protected ActivePlayer(string name, DiscColor disc) : base(name)
         {

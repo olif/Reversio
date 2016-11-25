@@ -9,11 +9,11 @@ namespace Reversio.Server
     [Authorize]
     public class GamesController : Controller
     {
-        private readonly GameServer _gameServer;
+        private readonly GameEngine _gameEngine;
 
         public GamesController()
         {
-            _gameServer = GameServer.Instance;
+            _gameEngine = GameEngine.Instance;
         }
 
         [HttpGet("user")]
@@ -23,47 +23,41 @@ namespace Reversio.Server
         }
 
         [HttpPost("signin")]
-        public IActionResult SignInBystander(Person person)
+        public IActionResult SignInPlayer(Player player)
         {
-            var bystander = new Participant(person.Name);
-            return Ok(bystander);
+            _gameEngine.RegisterPlayer(player);
+            return Ok();
         }
 
         [HttpGet("active")]
         public IActionResult GetActiveGames()
         {
-            var games = _gameServer.ActiveGames;
+            var games = _gameEngine.ActiveGames;
             return Ok(games);
         }
 
         [HttpPost]
-        public IActionResult CreateNewGame(BystanderModel model)
+        public IActionResult CreateNewGame(Player player)
         {
-            var bystander = model.ToBlackPlayer();
-            var game = _gameServer.CreateNewGame(bystander);
+            var game = _gameEngine.CreateNewGame(player);
             return Ok(game);
         }
 
         [HttpPost("{gameId:guid}/join")]
-        public IActionResult JoinGame(Guid gameId, BystanderModel model)
+        public IActionResult JoinGame(Guid gameId, Player player)
         {
-            var bystander = model.ToWhitePlayer();
-            var state = _gameServer.JoinGame(gameId, bystander);
+            var state = _gameEngine.JoinGame(gameId, player);
             return Ok(state);
         }
 
         [HttpPost("{gameId:guid}/observe")]
-        public IActionResult ObserveGame(Guid gameId, BystanderModel model)
+        public IActionResult ObserveGame(Guid gameId, Player player)
         {
-            var observer = model.ToObserver();
-            var state = _gameServer.JoinObserver(gameId, observer);
-            return Ok(state);
+            throw new NotImplementedException();
+            //var observer = model.ToObserver();
+            //var state = _gameServer.JoinObserver(gameId, observer);
+            //return Ok(state);
         }
-    }
-
-    public class Person
-    {
-        public string Name { get; set; }
     }
 }
 

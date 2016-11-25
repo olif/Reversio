@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -55,22 +53,24 @@ namespace Reversio.Server
             app.UseCors("AllowAll");
 
             var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("testtesttestteststestsss"));
-           
+
+            var tokenValidationParams = new TokenValidationParameters()
+            {
+                IssuerSigningKey = signingKey,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "reversio",
+                ValidateIssuer = true,
+                ValidAudience = "test",
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+                
             app.UseJwtBearerAuthentication(new JwtBearerOptions()
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
-                TokenValidationParameters = new TokenValidationParameters()
-                {
-                    IssuerSigningKey = signingKey,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = "reversio",
-                    ValidateIssuer = true,
-                    ValidAudience = "test",
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                },
+                TokenValidationParameters = tokenValidationParams
             });
 
             app.UseMiddleware<TokenProviderMiddleware>(Options.Create(new TokenProviderOptions()
@@ -82,8 +82,17 @@ namespace Reversio.Server
                 SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
             }));
 
+            app.UseCookieAuthentication(new CookieAuthenticationOptions()
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                AuthenticationScheme = "Cookie",
+                CookieName = "access_token",
+                TicketDataFormat = new CustomJwtDataFormat(SecurityAlgorithms.HmacSha256, tokenValidationParams)
+            });
+
             app.UseWebSockets();
-            app.UseWebSocketServer(new WebSocketGameServer(GameServer.Instance));
+            app.UseWebSocketServer(new WebSocketGameListener(GameEngine.Instance));
             app.UseMvc();
         }
     }

@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Reversio.Domain;
@@ -10,126 +11,151 @@ using Reversio.WebSockets;
 
 namespace Reversio.Server
 {
-    public class WebSocketGameServer : WebSocketServer
+    public class WebSocketGameListener : WebSocketServer
     {
-        private readonly GameServer _gameServer;
+        private GameEngine _gameEngine;
+        private IDictionary<ClaimsPrincipal, IWebSocketConnection> _activeSessions = new ConcurrentDictionary<ClaimsPrincipal, IWebSocketConnection>();
 
-        /// <summary>
-        /// All sessions with corresponding connection
-        /// </summary>
-        private readonly IDictionary<string, IWebSocketConnection> _sessions = new ConcurrentDictionary<string, IWebSocketConnection>();
-
-        public WebSocketGameServer(GameServer gameServer)
+        public WebSocketGameListener(GameEngine gameEngine)
         {
-            _gameServer = gameServer;
-            _gameServer.GameStateChanged += OnGameStateChanged;
-            _gameServer.GameCreated += OnGameCreated;
-            _gameServer.GameStarted += OnGameStarted;
+            _gameEngine = gameEngine;
+            _gameEngine.GameStarted += OnGameStarted;
+            _gameEngine.GameStateChanged += OnGameStateChanged;
         }
 
-        private void OnGameStarted(object sender, Participant participant, GameStartedEventArgs eventargs)
+        protected override void OnConnectionClosed(IWebSocketConnection conn)
         {
-            IWebSocketConnection conn;
-            if (_sessions.TryGetValue(participant.Name, out conn))
+            var entry = _activeSessions.FirstOrDefault(x => x.Value.Id == conn.Id);
+            _activeSessions.Remove(entry.Key);
+        }
+
+        protected override void OnConnectionOpened(IWebSocketConnection conn, HttpContext context)
+        {
+            var user = context.User;
+            _activeSessions.Add(user, conn);
+            _gameEngine.RegisterPlayer(new Player(user.Identity.Name));
+        }
+
+        protected override void OnMessageReceived(IWebSocketConnection conn, string message)
+        {
+            var move = JsonConvert.DeserializeObject<Message>(message);
+            var principal = _activeSessions.FirstOrDefault(x => x.Value.Id == conn.Id).Key;
+            var player = new Player(principal.Identity.Name);
+            switch (move.MessageType)
+            {
+                case MessageType.Move:
+                    var movePayload = move.Deserialize<MoveModel>();
+                    _gameEngine.MakeMove(movePayload.GameId, player, movePayload.Position.ToPosition());
+                    break;
+
+                case MessageType.StartGameWithRandomPlayer:
+                    _gameEngine.PutPlayerInQueue(player);
+                    break;
+            }
+        }
+
+        private void OnGameStarted(object sender, Player player, GameStartedEventArgs eventargs)
+        {
+            var session = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == player.Name);
+            if(!session.Equals(default(KeyValuePair<ClaimsPrincipal, IWebSocketConnection>)))
             {
                 var msg = Message.GameStarted(eventargs);
-                conn.Send(msg.ToJson());
+                session.Value.Send(msg.ToJson());
             }
         }
 
         private void OnGameCreated(object sender, GameCreatedEventArgs eventargs)
         {
-            foreach (var conn in _sessions.Values)
+            foreach (var conn in _activeSessions.Values)
             {
                 var msg = Message.GameCreated(eventargs);
                 conn.Send(msg.ToJson());
             }
         }
 
-        public void OnGameStateChanged(object sender, Participant participant, GameStateChangedEventArgs eventArgs)
+        public void OnGameStateChanged(object sender, Player player, GameStateChangedEventArgs eventArgs)
         {
-            IWebSocketConnection connection;
-            var message = Message.GameStateChangedMessage(eventArgs);
-            if (_sessions.TryGetValue(participant.Name, out connection))
+            var session = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == player.Name);
+            if (!session.Equals(default(KeyValuePair<ClaimsPrincipal, IWebSocketConnection>)))
             {
-                connection.Send(message.ToJson());
-            }
-        }
-
-        public override void OnConnectionOpened(IWebSocketConnection conn, IQueryCollection query)
-        {
-            var participantName = query["name"];
-            _sessions.Add(participantName, conn);
-        }
-
-        public override void OnMessageReceived(IWebSocketConnection conn, string message)
-        {
-            var move = JsonConvert.DeserializeObject<Message>(message);
-            switch (move.MessageType)
-            {
-                case MessageType.Move:
-                    var movePayload = move.Deserialize<MoveModel>();
-                    _gameServer.MakeMove(movePayload.GameId, movePayload.Bystander.Name, movePayload.Position.ToPosition());
-                    break;
-
-                case MessageType.StartGameWithRandomPlayer:
-                    var newGamePayload = move.Deserialize<RandomGameModel>();
-                    var observer = newGamePayload.Bystander.ToObserver();
-                    _gameServer.PutObserverInNewGameQueue(observer);
-                    break;
-            }
-        }
-
-        public override void OnConnectionClosed(IWebSocketConnection conn)
-        {
-            ;
-        }
-    }
-
-    public class RandomGameModel
-    {
-        public BystanderModel Bystander { get; set; }
-    }
-
-    public class MoveModel
-    {
-        public BystanderModel Bystander { get; set; }
-
-        public PositionModel Position { get; set; }
-
-        public Guid GameId { get; set; }
-
-        public class PositionModel
-        {
-            public int X { get; set; }
-
-            public int Y { get; set; }
-
-            public Position ToPosition()
-            {
-                return new Position(X, Y);
+                var msg = Message.GameStateChangedMessage(eventArgs);
+                session.Value.Send(msg.ToJson());
             }
         }
     }
+    //public class WebSocketGameServer : WebSocketServer
+    //{
+    //    private readonly GameServer _gameServer;
 
-    public class BystanderModel
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+    //    /// <summary>
+    //    /// All sessions with corresponding connection
+    //    /// </summary>
+    //    private readonly IDictionary<string, IWebSocketConnection> _sessions = new ConcurrentDictionary<string, IWebSocketConnection>();
 
-        public Participant ToObserver()
-        {
-            return new Participant(Id, Name);
-        }
+    //    public WebSocketGameServer(GameServer gameServer)
+    //    {
+    //        _gameServer = gameServer;
+    //        _gameServer.GameStateChanged += OnGameStateChanged;
+    //        _gameServer.GameCreated += OnGameCreated;
+    //        _gameServer.GameStarted += OnGameStarted;
+    //    }
 
-        public BlackPlayer ToBlackPlayer()
-        {
-            return new BlackPlayer(Id, Name);
-        }
+    //    private void OnGameStarted(object sender, Participant participant, GameStartedEventArgs eventargs)
+    //    {
+    //        IWebSocketConnection conn;
+    //        if (_sessions.TryGetValue(participant.Name, out conn))
+    //        {
+    //            var msg = Message.GameStarted(eventargs);
+    //            conn.Send(msg.ToJson());
+    //        }
+    //    }
 
-        public WhitePlayer ToWhitePlayer()
-        {
-            return new WhitePlayer(Id, Name);
-        }
-    }
+    //    private void OnGameCreated(object sender, GameCreatedEventArgs eventargs)
+    //    {
+    //        foreach (var conn in _sessions.Values)
+    //        {
+    //            var msg = Message.GameCreated(eventargs);
+    //            conn.Send(msg.ToJson());
+    //        }
+    //    }
+
+    //    public void OnGameStateChanged(object sender, Participant participant, GameStateChangedEventArgs eventArgs)
+    //    {
+    //        IWebSocketConnection connection;
+    //        var message = Message.GameStateChangedMessage(eventArgs);
+    //        if (_sessions.TryGetValue(participant.Name, out connection))
+    //        {
+    //            connection.Send(message.ToJson());
+    //        }
+    //    }
+
+    //    public override void OnConnectionOpened(IWebSocketConnection conn, IQueryCollection query)
+    //    {
+    //        var participantName = query["name"];
+    //        _sessions.Add(participantName, conn);
+    //    }
+
+    //    public override void OnMessageReceived(IWebSocketConnection conn, string message)
+    //    {
+    //        var move = JsonConvert.DeserializeObject<Message>(message);
+    //        switch (move.MessageType)
+    //        {
+    //            case MessageType.Move:
+    //                var movePayload = move.Deserialize<MoveModel>();
+    //                _gameServer.MakeMove(movePayload.GameId, movePayload.Bystander.Name, movePayload.Position.ToPosition());
+    //                break;
+
+    //            case MessageType.StartGameWithRandomPlayer:
+    //                var newGamePayload = move.Deserialize<RandomGameModel>();
+    //                var observer = newGamePayload.Bystander.ToObserver();
+    //                _gameServer.PutObserverInNewGameQueue(observer);
+    //                break;
+    //        }
+    //    }
+
+    //    public override void OnConnectionClosed(IWebSocketConnection conn)
+    //    {
+    //        ;
+    //    }
+    //}
 }

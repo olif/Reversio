@@ -10,7 +10,7 @@ namespace Reversio.Server.IntegrationTests
 
         public Action<IWebSocketConnection> ConnectionClosed;
 
-        public Action<IWebSocketConnection, IQueryCollection> ConnectionOpened;
+        public Action<IWebSocketConnection, HttpContext> ConnectionOpened;
 
         public WebSocketServerStub()
         {
@@ -19,19 +19,19 @@ namespace Reversio.Server.IntegrationTests
             ConnectionOpened = (conn, query) => { };
         }
 
-        public override void OnMessageReceived(IWebSocketConnection conn, string message)
+        protected override void OnMessageReceived(IWebSocketConnection conn, string message)
         {
             MessageReceived(conn, message);
         }
 
-        public override void OnConnectionClosed(IWebSocketConnection conn)
+        protected override void OnConnectionClosed(IWebSocketConnection conn)
         {
             ConnectionClosed(conn);
         }
 
-        public override void OnConnectionOpened(IWebSocketConnection conn, IQueryCollection query)
+        protected override void OnConnectionOpened(IWebSocketConnection conn, HttpContext context)
         {
-            ConnectionOpened(conn, query);
+            ConnectionOpened(conn, context);
         }
     }
 }

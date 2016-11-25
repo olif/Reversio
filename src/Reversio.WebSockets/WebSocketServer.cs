@@ -13,11 +13,11 @@ namespace Reversio.WebSockets
         private readonly IDictionary<Guid, IWebSocketConnection> _activeConnections = 
             new ConcurrentDictionary<Guid, IWebSocketConnection>();
 
-        public abstract void OnMessageReceived(IWebSocketConnection conn, string message);
+        protected abstract void OnMessageReceived(IWebSocketConnection conn, string message);
 
-        public abstract void OnConnectionClosed(IWebSocketConnection conn);
+        protected abstract void OnConnectionClosed(IWebSocketConnection conn);
 
-        public abstract void OnConnectionOpened(IWebSocketConnection conn, IQueryCollection query);
+        protected abstract void OnConnectionOpened(IWebSocketConnection conn, HttpContext context);
 
         private void OnCloseInternal(IWebSocketConnection connection)
         {
@@ -32,7 +32,7 @@ namespace Reversio.WebSockets
                 var socket = await context.WebSockets.AcceptWebSocketAsync(subProtocol: null);
 
                 var connection = new WebSocketConnection(socket, context.Request.Query, CancellationToken.None);
-                connection.OnOpen = () => OnConnectionOpened(connection, context.Request.Query);
+                connection.OnOpen = () => OnConnectionOpened(connection, context);
                 connection.OnMessage = (msg) => OnMessageReceived(connection, msg);
                 connection.OnClose = () => OnCloseInternal(connection);
 
