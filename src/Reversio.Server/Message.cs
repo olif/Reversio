@@ -15,6 +15,7 @@ namespace Reversio.Server
         public static Message GameStateChangedMessage(GameStateChangedEventArgs eventArgs) => new Message(Server.MessageType.GameStateChanged, eventArgs);
         public static Message GameCreated(GameCreatedEventArgs eventArgs) => new Message(Server.MessageType.NewGameCreated, eventArgs);
         public static Message GameStarted(GameStartedEventArgs eventArgs) => new Message(Server.MessageType.GameStarted, eventArgs);
+        public static Message InvitationDeclined => new Message(Server.MessageType.GameInvitationDeclined, string.Empty);
 
         public string MessageType { get; set; }
 
@@ -25,9 +26,14 @@ namespace Reversio.Server
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
+        public Message(string type)
+            :this(type, new object())
+        {
+            
+        }
+
         public Message(string type, object payload)
         {
-            var serializer = new JsonSerializer(); 
             MessageType = type;
             Payload = JObject.FromObject(payload, JsonSerializer);
         }

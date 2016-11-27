@@ -15,6 +15,7 @@ namespace Reversio.Server
         public const string JoinAsObserver = "reversio.event.joinAsObserver";
         public const string StartGameWithRandomPlayer = "reversio.event.startGameWithRandomPlayer";
         public const string SendGameInvitation = "reversio.event.sendGameInvitation";
+        public const string GameInvitationDeclined = "reversio.event.gameInvitationDeclined";
         public static string GetStats { get; set; }
     }
 }

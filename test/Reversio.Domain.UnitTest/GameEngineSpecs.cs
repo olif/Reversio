@@ -98,5 +98,64 @@ namespace Reversio.Domain.UnitTest
 
             moveOnWrongGame.ShouldThrow<ArgumentException>();
         }
+
+        [Fact]
+        public void A_player_can_invite_another_non_active_player_to_game()
+        {
+            bool playerInvited = false;
+            var part1 = new Player("1");
+            var part2 = new Player("2");
+            _sut.RegisterPlayer(part1);
+            _sut.RegisterPlayer(part2);
+            _sut.PlayerInvitedToNewGame += (sender, args) => playerInvited = true;
+
+            var isChallangeSent = _sut.TryInvitePlayerToGame(part1, part2);
+
+            playerInvited.Should().BeTrue();
+            isChallangeSent.Should().BeTrue();
+        }
+
+        [Fact]
+        public void A_player_cannot_invite_a_player_that_is_already_playing_a_game()
+        {
+            bool playerInvited = false;
+            var part1 = new Player("2");
+            var part2 = new Player("3");
+            _sut.RegisterPlayer(part1);
+            _sut.RegisterPlayer(part2);
+            _sut.CreateNewGame(part2);
+            _sut.PlayerInvitedToNewGame += (sender, args) => playerInvited = true;
+
+            var isChallangeSent = _sut.TryInvitePlayerToGame(part1, part2);
+
+            playerInvited.Should().BeFalse();
+            isChallangeSent.Should().BeFalse();
+        }
+
+        [Fact]
+        public void An_invited_player_can_accept_the_invitation_which_starts_a_new_game()
+        {
+            var playerInvited = false;
+            var newGameStarted = false;
+            var part1 = new Player("4");
+            var part2 = new Player("5");
+            _sut.RegisterPlayer(part1);
+            _sut.RegisterPlayer(part2);
+            _sut.PlayerInvitedToNewGame += (sender, args) => playerInvited = true;
+            _sut.GameStarted += (sender, participant, args) =>
+            {
+                if (participant == part1 || participant == part2)
+                {
+                    newGameStarted = true;
+                } 
+            };
+            var isChallangeSent = _sut.TryInvitePlayerToGame(part1, part2);
+
+            _sut.InvitationResponse(part2, part1, true);
+
+            isChallangeSent.Should().BeTrue();
+            playerInvited.Should().BeTrue();
+            newGameStarted.Should().BeTrue();
+        }
     }
 }

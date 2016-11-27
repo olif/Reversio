@@ -7,20 +7,22 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Reversio.Domain;
 using Reversio.Domain.Events;
+using Reversio.Server.Models;
 using Reversio.WebSockets;
 
 namespace Reversio.Server
 {
-    public class WebSocketGameListener : WebSocketServer
+    public class WebSocketGameHandler : WebSocketServer
     {
         private GameEngine _gameEngine;
         private IDictionary<ClaimsPrincipal, IWebSocketConnection> _activeSessions = new ConcurrentDictionary<ClaimsPrincipal, IWebSocketConnection>();
 
-        public WebSocketGameListener(GameEngine gameEngine)
+        public WebSocketGameHandler(GameEngine gameEngine)
         {
             _gameEngine = gameEngine;
             _gameEngine.GameStarted += OnGameStarted;
             _gameEngine.GameStateChanged += OnGameStateChanged;
+            _gameEngine.GameInvitationDeclined += OnGameInvitationDeclined;
         }
 
         protected override void OnConnectionClosed(IWebSocketConnection conn)
@@ -38,13 +40,13 @@ namespace Reversio.Server
 
         protected override void OnMessageReceived(IWebSocketConnection conn, string message)
         {
-            var move = JsonConvert.DeserializeObject<Message>(message);
+            var msg = JsonConvert.DeserializeObject<Message>(message);
             var principal = _activeSessions.FirstOrDefault(x => x.Value.Id == conn.Id).Key;
             var player = new Player(principal.Identity.Name);
-            switch (move.MessageType)
+            switch (msg.MessageType)
             {
                 case MessageType.Move:
-                    var movePayload = move.Deserialize<MoveModel>();
+                    var movePayload = msg.Deserialize<MoveModel>();
                     _gameEngine.MakeMove(movePayload.GameId, player, movePayload.Position.ToPosition());
                     break;
 
@@ -52,6 +54,13 @@ namespace Reversio.Server
                     _gameEngine.PutPlayerInQueue(player);
                     break;
             }
+        }
+
+        private void OnGameInvitationDeclined(object sender, InvitationEventArgs e)
+        {
+            var conn = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == e.Invitee.Name).Value;
+            var msg = Message.InvitationDeclined;
+            conn?.Send(msg.ToJson());
         }
 
         private void OnGameStarted(object sender, Player player, GameStartedEventArgs eventargs)

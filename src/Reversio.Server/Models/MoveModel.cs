@@ -1,7 +1,7 @@
 ﻿using System;
 using Reversio.Domain;
 
-namespace Reversio.Server
+namespace Reversio.Server.Models
 {
     public class MoveModel
     {

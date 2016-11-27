@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Reversio.Domain.Events
 {
     public delegate void GameStartedHandler(object sender, Player participant, GameStartedEventArgs eventArgs);
 
-    public class GameStartedEventArgs
+    public class GameStartedEventArgs : EventArgs
     {
         public GameStartedEventArgs(GameState currentState, ActivePlayer activePlayer)
         {

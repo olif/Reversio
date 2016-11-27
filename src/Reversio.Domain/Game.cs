@@ -52,6 +52,11 @@ namespace Reversio.Domain
 
         public event PlayerJoinedHandler PlayerJoined;
 
+        public bool HasPlayer(Player player)
+        {
+            return player == _blackPlayer || player == _whitePlayer;
+        }
+
         public void JoinOpponent(WhitePlayer player)
         {
             if(_whitePlayer != null)

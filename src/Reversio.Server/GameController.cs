@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reversio.Domain;
+using Reversio.Server.Models;
 
 namespace Reversio.Server
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [Authorize]
     public class GamesController : Controller
     {
@@ -36,11 +37,32 @@ namespace Reversio.Server
             return Ok(games);
         }
 
+        [HttpGet("players")]
+        public IActionResult GetRegisteredPlayers()
+        {
+            var players = _gameEngine.RegisteredPlayers;
+            return Ok(players);
+        }
+
         [HttpPost]
         public IActionResult CreateNewGame(Player player)
         {
             var game = _gameEngine.CreateNewGame(player);
             return Ok(game);
+        }
+
+        [HttpPost("invite")]
+        public IActionResult InviteOpponent(GameInvitationModel invitation)
+        {
+            var playerName = User.Identity.Name;
+            var player = new Player(playerName);
+            var isChallangeSent = _gameEngine.TryInvitePlayerToGame(player, invitation.Opponent);
+            if (isChallangeSent)
+            {
+                return Ok();
+            }
+
+            return BadRequest("Opponent not available");
         }
 
         [HttpPost("{gameId:guid}/join")]
@@ -54,9 +76,6 @@ namespace Reversio.Server
         public IActionResult ObserveGame(Guid gameId, Player player)
         {
             throw new NotImplementedException();
-            //var observer = model.ToObserver();
-            //var state = _gameServer.JoinObserver(gameId, observer);
-            //return Ok(state);
         }
     }
 }

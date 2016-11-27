@@ -92,7 +92,7 @@ namespace Reversio.Server
             });
 
             app.UseWebSockets();
-            app.UseWebSocketServer(new WebSocketGameListener(GameEngine.Instance));
+            app.UseWebSocketServer(new WebSocketGameHandler(GameEngine.Instance));
             app.UseMvc();
         }
     }
