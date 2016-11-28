@@ -8,11 +8,19 @@ Vue.use(Vuex)
 
 const api = new Api()
 
+const states = {
+  UNDEFINED: 'UNDEFINED',
+  WAITING_FOR_PLAYER: 'WAITING_FOR_PLAYER',
+  WAITING_ON_INVITATION_RESPONSE: 'WAITING_ON_INVITATION_RESPONSE',
+  PLAYING: 'PLAYING'
+}
+
 const store = new Vuex.Store({
   state: {
     signedInUser: null,
-    currentState: null,
+    currentState: states.UNDEFINED,
     activeGames: [],
+    opponents: [],
     activeGame: {
       disc: 0,
       state: [],
@@ -21,6 +29,29 @@ const store = new Vuex.Store({
   },
 
   actions: {
+
+    INVITE_PLAYER: function ({commit}, opponent) {
+      return api.invitePlayer(opponent)
+        .then(() => commit('SET_STATE', states.WAITING_ON_INVITATION_RESPONSE))
+    },
+
+    LOAD_GAMES: function ({commit}) {
+      api.loadGames()
+        .then((games) => {
+          commit('SET_ACTIVE_GAMES', games.data)
+        })
+    },
+    
+    LOAD_PLAYERS: function ({commit}) {
+      api.loadPlayers()
+        .then((players) => {
+          commit('SET_PLAYERS', players.data)
+        })
+    },
+
+    MAKE_MOVE: function ({commit, state}, move) {
+      socketHandler.makeMove(state.activeGame.gameId, state.signedInUser, move)
+    },
 
     SIGN_IN: function ({ commit }, username) {
       return new Promise((resolve, reject) => {
@@ -36,7 +67,7 @@ const store = new Vuex.Store({
           })
       })
     },
-
+ 
     SIGN_IN_AS_GUEST: function ({ commit }) {
       return new Promise((resolve, reject) => {
         api.signinAsGuest()
@@ -53,26 +84,10 @@ const store = new Vuex.Store({
       })
     },
 
-    LOAD_GAMES: function ({commit}) {
-      api.loadGames()
-        .then((games) => {
-          commit('SET_ACTIVE_GAMES', games.data)
-        })
-    },
-
-    WAIT_FOR_PLAYER: function ({commit}) {
-      socketHandler.waitForOpponent()
-      commit('WAIT_FOR_PLAYER')
-    },
-
     START_GAME: function ({commit}, gameStartedState) {
       commit('START_GAME', gameStartedState)
       console.log(gameStartedState)
       router.push({name: 'game', params: {id: gameStartedState.currentState.gameId}})
-    },
-
-    MAKE_MOVE: function ({commit, state}, move) {
-      socketHandler.makeMove(state.activeGame.gameId, state.signedInUser, move)
     },
 
     UPDATE_GAME_STATE: function ({commit}, gameState) {
@@ -80,6 +95,11 @@ const store = new Vuex.Store({
       for (let disc of gameState.currentState.discsFlipped) {
         commit('UPDATE_POSITION', disc)
       }
+    },
+
+    WAIT_FOR_PLAYER: function ({commit}) {
+      socketHandler.waitForOpponent()
+      commit('SET_STATE', states.WAITING_FOR_PLAYER)
     }
   },
 
@@ -89,18 +109,23 @@ const store = new Vuex.Store({
       state.signedInUser = user
     },
 
-    WAIT_FOR_PLAYER: (state) => {
-      state.currentState = 'WAITING_FOR_PLAYER'
-    },
-
     SET_ACTIVE_GAMES: (state, games) => {
       state.activeGames = games
+    },
+
+    SET_PLAYERS: (state, players) => {
+      state.opponents = players
     },
 
     START_GAME: (state, gameStartedState) => {
       state.activeGame.discColor = gameStartedState.playerAssignedDisc
       state.activeGame.state = gameStartedState.currentState
       state.activeGame.gameId = gameStartedState.currentState.gameId
+      state.currentState = states.PLAYING
+    },
+
+    SET_STATE: (state, newState) => {
+      state.currentState = newState
     },
 
     PLACE_DISC: (state, disc) => {
@@ -122,6 +147,10 @@ const store = new Vuex.Store({
     UPDATE_GAME_STATE: (state, gameState) => {
       state.activeGame.state = gameState
     }
+  },
+  
+  getters: {
+    currentState: state => state.currentState
   }
 })
 

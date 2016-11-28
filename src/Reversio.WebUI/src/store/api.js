@@ -33,11 +33,25 @@ export default class Api {
     })
   }
 
+  /**
+   * Invites another player to a game
+   *
+   * @param {Object} opponent
+   * @returns {Promise}
+   **/
+  invitePlayer (opponent) {
+    return axios.post('invite', opponent)
+  }
+
   _setToken (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }
 
   loadGames () {
     return axios.get('games/active')
+  }
+  
+  loadPlayers () {
+    return axios.get('players')
   }
 }
