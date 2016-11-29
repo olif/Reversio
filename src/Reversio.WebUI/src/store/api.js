@@ -10,7 +10,7 @@ export default class Api {
   }
 
   signin (userName) {
-    return axios.post('/games/signin', {
+    return axios.post('/signin', {
       userName: userName
     })
   }
@@ -46,12 +46,21 @@ export default class Api {
   _setToken (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }
-
+  
   loadGames () {
-    return axios.get('games/active')
+    return axios.get('active')
   }
   
   loadPlayers () {
     return axios.get('players')
+  }
+  
+  makeMove (gameId, move) {
+    let uri = `${gameId}/move`
+    return axios.post(uri, move)
+  }
+  
+  startRandomGame () {
+    return axios.post('randomgame')
   }
 }

@@ -32,7 +32,7 @@ export default class GameSocketHandler {
     }
   }
 
-  makeMove (gameId, user, position) {
+  /* makeMove (gameId, user, position) {
     let msg = {
       messageType: 'reversio.event.move',
       payload: {
@@ -53,5 +53,5 @@ export default class GameSocketHandler {
       }
     }
     this.socket.send(JSON.stringify(msg))
-  }
+  } */
 }

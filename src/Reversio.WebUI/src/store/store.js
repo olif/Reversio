@@ -36,21 +36,21 @@ const store = new Vuex.Store({
     },
 
     LOAD_GAMES: function ({commit}) {
-      api.loadGames()
+      return api.loadGames()
         .then((games) => {
           commit('SET_ACTIVE_GAMES', games.data)
         })
     },
     
     LOAD_PLAYERS: function ({commit}) {
-      api.loadPlayers()
+      return api.loadPlayers()
         .then((players) => {
           commit('SET_PLAYERS', players.data)
         })
     },
 
     MAKE_MOVE: function ({commit, state}, move) {
-      socketHandler.makeMove(state.activeGame.gameId, state.signedInUser, move)
+      return api.makeMove(state.activeGame.gameId, move)
     },
 
     SIGN_IN: function ({ commit }, username) {
@@ -98,8 +98,9 @@ const store = new Vuex.Store({
     },
 
     WAIT_FOR_PLAYER: function ({commit}) {
-      socketHandler.waitForOpponent()
-      commit('SET_STATE', states.WAITING_FOR_PLAYER)
+      api.startRandomGame().then(() => {
+        commit('SET_STATE', states.WAITING_FOR_PLAYER)
+      })
     }
   },
 

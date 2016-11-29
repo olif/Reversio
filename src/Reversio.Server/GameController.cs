@@ -54,8 +54,7 @@ namespace Reversio.Server
         [HttpPost("invite")]
         public IActionResult InviteOpponent(GameInvitationModel invitation)
         {
-            var playerName = User.Identity.Name;
-            var player = new Player(playerName);
+            Player player = GetPlayer();
             var isChallangeSent = _gameEngine.TryInvitePlayerToGame(player, invitation.Opponent);
             if (isChallangeSent)
             {
@@ -63,6 +62,13 @@ namespace Reversio.Server
             }
 
             return BadRequest("Opponent not available");
+        }
+
+        private Player GetPlayer()
+        {
+            var playerName = User.Identity.Name;
+            var player = new Player(playerName);
+            return player;
         }
 
         [HttpPost("{gameId:guid}/join")]
@@ -75,7 +81,24 @@ namespace Reversio.Server
         [HttpPost("{gameId:guid}/observe")]
         public IActionResult ObserveGame(Guid gameId, Player player)
         {
-            throw new NotImplementedException();
+            _gameEngine.ObserveGame(gameId, player);
+            return Ok();
+        }
+
+        [HttpPost("randomgame")]
+        public IActionResult StartRandomGame()
+        {
+            var player = GetPlayer();
+            _gameEngine.PutPlayerInQueue(player);
+            return Ok();
+        }
+
+        [HttpPost("{gameId:guid}/move")]
+        public IActionResult MakeMove(Guid gameId, [FromBody] MoveModel.PositionModel model)
+        {
+            var player = GetPlayer();
+            var discsFlipped = _gameEngine.MakeMove(gameId, player, model.ToPosition());
+            return Ok(discsFlipped != null && discsFlipped.Count > 0);
         }
     }
 }

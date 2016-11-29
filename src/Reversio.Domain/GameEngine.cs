@@ -9,7 +9,7 @@ namespace Reversio.Domain
 {
     public class GameEngine
     {
-        private object _waitingToPlayLock = new object();
+        private readonly object _waitingToPlayLock = new object();
         private Player _waitingPlayer;
         public event GameStartedHandler GameStarted;
         private readonly IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
@@ -25,7 +25,7 @@ namespace Reversio.Domain
         {
         }
 
-        public IReadOnlyList<Game> ActiveGames => _activeGames.Values.ToList().AsReadOnly();
+        public IReadOnlyList<GameState> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
 
         public IReadOnlyList<Player> RegisteredPlayers => _registeredPlayers.Values.ToList().AsReadOnly();
 
@@ -153,6 +153,14 @@ namespace Reversio.Domain
         protected virtual void OnGameInvitationDeclined(InvitationEventArgs e)
         {
             GameInvitationDeclined?.Invoke(this, e);
+        }
+
+        public void ObserveGame(Guid gameId, Player player)
+        {
+            AssertPlayerIsRegistered(player);
+
+            var game = _activeGames[gameId];
+            game.JoinObserver(player);
         }
     }
 }

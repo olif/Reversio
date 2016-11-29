@@ -26,6 +26,10 @@ namespace Reversio.Server
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
+        private Message()
+        {
+        }
+
         public Message(string type)
             :this(type, new object())
         {
