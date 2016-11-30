@@ -2,11 +2,12 @@
   <div class="gamearea-page ui container">
     <h1>Games</h1>
     <div class="ui grid">
-      <div class="four wide column">
+      <div class="right aligned four wide column ">
           <h3>Controls</h3>
           <div class="ui vertical buttons">
-            <button class="ui button primary" v-on:click="waitForPlayer">Create new game</button>
-            <button class="ui button primary" v-on:click="waitForPlayer">Wait for player</button>
+            <button class="ui button" v-on:click.prevent="createNewGame">Create new game</button>
+            <button class="ui button" v-on:click.prevent="waitForPlayer">Wait for player</button>
+            <button class="ui button" v-on:click.prevent="test">jQuery</button>
           </div>
         <span v-if="isWaitingForOpponent">Waiting for an opponent</span>
       </div>
@@ -33,13 +34,50 @@
       </div>
       <div class="four wide column">
         <h3>Players</h3>
-        hello
+        <div class="ui list">
+          <div class="item" v-for="player in registeredPlayers">
+            <i class="large user left aligned icon"></i>
+            <div class="content">
+              <a class="header">{{ player.name }}</a>
+              <div class="description">
+                description
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+    <div class="ui basic modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Archive Old Messages
+  </div>
+  <div class="image content">
+    <div class="image">
+      <i class="archive icon"></i>
+    </div>
+    <div class="description">
+      <p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="two fluid ui inverted buttons">
+      <div class="ui cancel red basic inverted button">
+        <i class="remove icon"></i>
+        No
+      </div>
+      <div class="ui ok green basic inverted button">
+        <i class="checkmark icon"></i>
+        Yes
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </template>
 
 <script>
+/* global $ */
 export default {
   data: function () {
     return {
@@ -47,6 +85,10 @@ export default {
     }
   },
   methods: {
+    test (e) {
+      console.log($('.ui.basic.modal'))
+      $('.ui.basic.modal').modal('show')
+    },
     waitForPlayer (e) {
       console.log('waiting for player')
       this.$store.dispatch('WAIT_FOR_PLAYER')
@@ -54,6 +96,12 @@ export default {
   },
   computed: {
     activeGames: function () {
+      return this.$store.state.activeGames
+    },
+    registeredPlayers: function () {
+      return this.$store.state.registeredPlayers
+    },
+    /* activeGames: function () {
       return [{
         gameId: '522a7ab2-c379-4cc7-887f-ea810039ec8d',
         lastValidMove: null,
@@ -90,6 +138,14 @@ export default {
         }
       }]
     },
+    registeredPlayers: function () {
+      return [
+        { name: 'Player1' }, 
+        { name: 'Player2' },
+        { name: 'Player3' },
+        { name: 'Player4' }
+      ]
+    },  */
     isWaitingForOpponent: function () {
       console.log('checking state')
       console.log(this.$store.state.currentState)

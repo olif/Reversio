@@ -44,9 +44,10 @@ namespace Reversio.Server
             return Ok(players);
         }
 
-        [HttpPost]
-        public IActionResult CreateNewGame(Player player)
+        [HttpPost("games/new")]
+        public IActionResult CreateNewGame()
         {
+            var player = GetPlayer();
             var game = _gameEngine.CreateNewGame(player);
             return Ok(game);
         }

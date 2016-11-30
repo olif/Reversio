@@ -8,6 +8,10 @@ export default class Api {
   constructor () {
     this.accessToken = null
   }
+  
+  createNewGame () {
+    return axios.post('games/create')
+  }
 
   signin (userName) {
     return axios.post('/signin', {

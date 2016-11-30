@@ -25,7 +25,7 @@
           </div>
           <div class="ui error message"></div>
           <div class="ui segment">
-            <button type="button" @click="signinAsGuest()" class="ui fluid large pink submit button">Sign in as guest</button>
+            <button type="button" v-on:click.prevent="signinAsGuest" class="ui fluid large pink submit button">Sign in as guest</button>
            </div>
         </form>
       </div>
