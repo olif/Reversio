@@ -2,41 +2,59 @@
   <div class="gamearea-page ui container">
     <h1>Games</h1>
     <div class="ui grid">
-      <div class="right aligned four wide column ">
+      <div class="right aligned three wide column ">
           <h3>Controls</h3>
-          <div class="ui vertical buttons">
-            <button class="ui button" v-on:click.prevent="createNewGame">Create new game</button>
+          <div class="ui compact vertical labeled icon menu">
+            <a class="item">
+              <i class="gamepad icon"></i>
+              Create new game
+            </a>
+            <a class="item">
+              <i class="random icon"></i>
+              Random game
+            </a>
+          </div>
+          <!--<div class="ui vertical buttons">
             <button class="ui button" v-on:click.prevent="waitForPlayer">Wait for player</button>
             <button class="ui button" v-on:click.prevent="test">jQuery</button>
-          </div>
+          </div>-->
         <span v-if="isWaitingForOpponent">Waiting for an opponent</span>
       </div>
       
       <div class="eight wide column">
         <h3>Current games</h3>
         <div class="ui relaxed divided list">
-          <div class="item" v-for="game in activeGames">
-            <div class="right floated content">
-              <button type="button" class="ui primary button">Watch</button>
-            </div>
-            <i class="large circle middle aligned icon"></i>
-            <div class="content">
-              <a class="header">
-                {{game.blackPlayerStatus.name}} [{{game.blackPlayerStatus.score}}] 
-                - 
-                {{game.whitePlayerStatus.name}} [{{game.whitePlayerStatus.score}}]
-                </a>
-              <div class="description">
+          
+          <div v-if="activeGames.length > 0">
+            <div class="item" v-for="game in activeGames">
+              <div class="right floated content">
+                <button type="button" class="ui primary button">Watch</button>
+              </div>
+              <i class="large circle middle aligned icon"></i>
+              <div class="content">
+                <a class="header">
+                  {{game.blackPlayerStatus.name}} [{{game.blackPlayerStatus.score}}] 
+                  - 
+                  {{game.whitePlayerStatus.name}} [{{game.whitePlayerStatus.score}}]
+                  </a>
+                <div class="description">
+                </div>
               </div>
             </div>
           </div>
+          <div v-if="activeGames.length == 0">
+            <p>No active games</p>
+          </div>
         </div>
       </div>
-      <div class="four wide column">
+      <div class="five wide column">
         <h3>Players</h3>
-        <div class="ui list">
+        <div class="ui middle aligned divided list">
           <div class="item" v-for="player in registeredPlayers">
-            <i class="large user left aligned icon"></i>
+            <div class="right floated content">
+              <button class="ui toggle button" v-on:click="invite(player,  $event)">Invite</button>
+            </div>
+            <i class="large user icon"></i>
             <div class="content">
               <a class="header">{{ player.name }}</a>
               <div class="description">
@@ -87,11 +105,13 @@ export default {
   methods: {
     test (e) {
       console.log($('.ui.basic.modal'))
-      $('.ui.basic.modal').modal('show')
+      // $('.ui.basic.modal').modal('show')
     },
     waitForPlayer (e) {
       console.log('waiting for player')
       this.$store.dispatch('WAIT_FOR_PLAYER')
+    },
+    invite (player, e) {
     }
   },
   computed: {
@@ -99,7 +119,7 @@ export default {
       return this.$store.state.activeGames
     },
     registeredPlayers: function () {
-      return this.$store.state.registeredPlayers
+      return this.$store.state.opponents
     },
     /* activeGames: function () {
       return [{
@@ -154,6 +174,7 @@ export default {
   },
   beforeMount () {
     this.$store.dispatch('LOAD_GAMES')
+    this.$store.dispatch('LOAD_PLAYERS')
   }
 }
 </script>

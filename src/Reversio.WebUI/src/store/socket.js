@@ -7,7 +7,7 @@ export default class GameSocketHandler {
 
   connect (token) {
     this.token = token
-    this.socket = new WebSocket(`ws://localhost:53274`)
+    this.socket = new WebSocket(`ws://localhost:5000`)
     this.socket.onopen = (e) => console.log('ws connection open')
     this.socket.onmessage = (e) => this.dispatchMessage(e)
   }
