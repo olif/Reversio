@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Reversio.Domain;
@@ -40,8 +41,10 @@ namespace Reversio.Server
         [HttpGet("players")]
         public IActionResult GetRegisteredPlayers()
         {
-            var players = _gameEngine.RegisteredPlayers;
-            return Ok(players);
+            var allPlayers = _gameEngine.RegisteredPlayers;
+            var otherPlayers = allPlayers.Where(x => x != new Player(User.Identity.Name));
+
+            return Ok(otherPlayers);
         }
 
         [HttpPost("games/new")]
