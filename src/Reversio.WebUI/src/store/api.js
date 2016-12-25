@@ -10,7 +10,7 @@ export default class Api {
   }
   
   createNewGame () {
-    return axios.post('games/create')
+    return axios.post('games/new')
   }
 
   signin (userName) {
@@ -62,9 +62,5 @@ export default class Api {
   makeMove (gameId, move) {
     let uri = `${gameId}/move`
     return axios.post(uri, move)
-  }
-  
-  startRandomGame () {
-    return axios.post('randomgame')
   }
 }

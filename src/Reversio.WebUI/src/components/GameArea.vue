@@ -5,20 +5,11 @@
       <div class="right aligned three wide column ">
           <h3>Controls</h3>
           <div class="ui compact vertical labeled icon menu">
-            <a class="item">
+            <a class="item" v-on:click.prevent="startNewGame">
               <i class="gamepad icon"></i>
-              Create new game
-            </a>
-            <a class="item">
-              <i class="random icon"></i>
-              Random game
+              Start new game
             </a>
           </div>
-          <!--<div class="ui vertical buttons">
-            <button class="ui button" v-on:click.prevent="waitForPlayer">Wait for player</button>
-            <button class="ui button" v-on:click.prevent="test">jQuery</button>
-          </div>-->
-        <span v-if="isWaitingForOpponent">Waiting for an opponent</span>
       </div>
       
       <div class="eight wide column">
@@ -105,11 +96,17 @@ export default {
   methods: {
     test (e) {
       console.log($('.ui.basic.modal'))
-      // $('.ui.basic.modal').modal('show')
     },
     waitForPlayer (e) {
       console.log('waiting for player')
       this.$store.dispatch('WAIT_FOR_PLAYER')
+    },
+    startNewGame (e) {
+      this.$store.dispatch('START_NEW_GAME')
+        .then(() => {
+          console.log(this.$store.state)
+          this.$router.push({ name: 'game', params: { id: this.$store.state.activeGame.gameId } })
+        })
     },
     invite (player, e) {
     }

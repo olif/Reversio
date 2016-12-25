@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from '../router'
+/* import router from '../router' */
 import Api from './api'
 import SocketHandler from './socket'
 
@@ -12,6 +12,7 @@ const states = {
   UNDEFINED: 'UNDEFINED',
   WAITING_FOR_PLAYER: 'WAITING_FOR_PLAYER',
   WAITING_ON_INVITATION_RESPONSE: 'WAITING_ON_INVITATION_RESPONSE',
+  NEW_GAME_STARTED: 'NEW_GAME_STARTED',
   PLAYING: 'PLAYING'
 }
 
@@ -22,10 +23,21 @@ const store = new Vuex.Store({
     activeGames: [],
     opponents: [],
     activeGame: {
+      gameId: '',
+      lastValidMove: null,
+      discsFlipped: [],
+      discOfNextMove: null,
+      isGameFinished: false,
+      currentState: [],
+      blackPlayerStatus: null,
+      whitePlayerStatus: null
+    },
+    activeDisc: -1
+    /* activeGame: {
       disc: 0,
       state: [],
       gameId: null
-    }
+    } */
   },
 
   actions: {
@@ -41,7 +53,7 @@ const store = new Vuex.Store({
           commit('SET_ACTIVE_GAMES', games.data)
         })
     },
-    
+
     LOAD_PLAYERS: function ({commit}) {
       return api.loadPlayers()
         .then((players) => {
@@ -67,7 +79,7 @@ const store = new Vuex.Store({
           })
       })
     },
- 
+
     SIGN_IN_AS_GUEST: function ({ commit }) {
       return new Promise((resolve, reject) => {
         api.signinAsGuest()
@@ -84,24 +96,37 @@ const store = new Vuex.Store({
       })
     },
 
-    START_GAME: function ({commit}, gameStartedState) {
+    START_NEW_GAME: function ({commit, state}) {
+      return new Promise((resolve, reject) => {
+        api.createNewGame().then((game) => {
+          commit('START_GAME', game.data)
+          resolve(game.data)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+      })
+    },
+
+    /* START_GAME: function ({commit}, gameStartedState) {
       commit('START_GAME', gameStartedState)
       console.log(gameStartedState)
-      router.push({name: 'game', params: {id: gameStartedState.currentState.gameId}})
-    },
+      router.push({ name: 'game', params: { id: gameStartedState.currentState.gameId } })
+    }, */
 
     UPDATE_GAME_STATE: function ({commit}, gameState) {
       commit('PLACE_DISC', gameState.currentState.lastValidMove)
       for (let disc of gameState.currentState.discsFlipped) {
         commit('UPDATE_POSITION', disc)
       }
-    },
-
-    WAIT_FOR_PLAYER: function ({commit}) {
-      api.startRandomGame().then(() => {
-        commit('SET_STATE', states.WAITING_FOR_PLAYER)
-      })
+      commit('UPDATE_SCORES', [gameState.currentState.blackPlayerStatus.score, gameState.currentState.whitePlayerStatus.score])
     }
+
+    /* wait_for_player: function ({commit}) {
+      api.startrandomgame().then(() => {
+        commit('set_state', states.waiting_for_player)
+      })
+    } */
   },
 
   mutations: {
@@ -118,11 +143,14 @@ const store = new Vuex.Store({
       state.opponents = players
     },
 
-    START_GAME: (state, gameStartedState) => {
-      state.activeGame.discColor = gameStartedState.playerAssignedDisc
+    START_GAME: (state, gameStarted) => {
+      state.activeGame = gameStarted
+      state.activeColor = -1
+      state.currentState = states.PLAYING
+      /* state.activeGame.discColor = gameStartedState.playerAssignedDisc
       state.activeGame.state = gameStartedState.currentState
       state.activeGame.gameId = gameStartedState.currentState.gameId
-      state.currentState = states.PLAYING
+      state.currentState = states.PLAYING */
     },
 
     SET_STATE: (state, newState) => {
@@ -133,25 +161,30 @@ const store = new Vuex.Store({
       let i = disc.position.y
       let j = disc.position.x
       let discColor = disc.disc.color
-      let row = state.activeGame.state.currentState[i]
+      let row = state.activeGame.currentState[i]
       row.splice(j, 1, discColor)
     },
 
     UPDATE_POSITION: (state, position) => {
       let i = position.y
       let j = position.x
-      let row = state.activeGame.state.currentState[i]
+      let row = state.activeGame.currentState[i]
       let disc = row[j]
       row.splice(j, 1, disc * -1)
+    },
+
+    UPDATE_SCORES: (state, scores) => {
+      state.activeGame.blackPlayerStatus.score = scores[0]
+      state.activeGame.whitePlayerStatus.score = scores[1]
     },
 
     UPDATE_GAME_STATE: (state, gameState) => {
       state.activeGame.state = gameState
     }
   },
-  
+
   getters: {
-    currentState: state => state.currentState
+    currentState: state => state
   }
 })
 
