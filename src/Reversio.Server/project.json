@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "Reversio.Domain": "1.0.0-*",
-    "Reversio.WebSockets": "1.0.0-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.1.0-preview1-final",
     "Microsoft.AspNetCore.WebSockets": "0.2.0-preview1-final",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0-preview1-final",
