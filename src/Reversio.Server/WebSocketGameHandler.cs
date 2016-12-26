@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Reversio.Domain;
 using Reversio.Domain.Events;
 using Reversio.Server.Models;
-using Reversio.WebSockets;
+using Webster.Server;
 
 namespace Reversio.Server
 {

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Reversio.Domain;
 using Reversio.Server.Auth;
-using Reversio.WebSockets;
+using Webster.Server;
 
 namespace Reversio.Server
 {
