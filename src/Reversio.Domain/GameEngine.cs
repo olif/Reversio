@@ -15,6 +15,7 @@ namespace Reversio.Domain
         private readonly IDictionary<Guid, Game> _activeGames = new ConcurrentDictionary<Guid, Game>();
         private readonly IDictionary<string, Player> _registeredPlayers = new ConcurrentDictionary<string, Player>();
         private readonly IList<Tuple<Player, Player>> _invitations = new List<Tuple<Player, Player>>();
+
         public event GameStateChangedHandler GameStateChanged;
         public event GameInvitationHandler PlayerInvitedToNewGame;
         public event GameInvitationHandler GameInvitationDeclined;
@@ -25,7 +26,7 @@ namespace Reversio.Domain
         {
         }
 
-        public IReadOnlyList<GameState> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
+        public IReadOnlyList<GameStatus> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
 
         public IReadOnlyList<Player> RegisteredPlayers => _registeredPlayers.Values.ToList().AsReadOnly();
 
@@ -106,7 +107,7 @@ namespace Reversio.Domain
             }
         }
 
-        public GameState CreateNewGame(Player player)
+        public GameStatus CreateNewGame(Player player)
         {
             AssertPlayerIsRegistered(player);
 
@@ -121,7 +122,7 @@ namespace Reversio.Domain
             return game.CurrentState;
         }
 
-        public GameState JoinGame(Guid gameId, Player player)
+        public GameStatus JoinGame(Guid gameId, Player player)
         {
             AssertPlayerIsRegistered(player);
 
@@ -132,7 +133,7 @@ namespace Reversio.Domain
             return game.CurrentState;
         }
 
-        protected virtual void OnGameStarted(ActivePlayer player, GameState currentState)
+        protected virtual void OnGameStarted(ActivePlayer player, GameStatus currentState)
         {
             GameStarted?.Invoke(this, player, new GameStartedEventArgs(currentState, player));
         }

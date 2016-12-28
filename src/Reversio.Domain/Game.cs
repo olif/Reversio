@@ -15,10 +15,10 @@ namespace Reversio.Domain
         private WhitePlayer _whitePlayer;
         private DiscColor _discOfNextMove;
         public readonly Board Board;
+        public GameState GameState { get; private set; }
         public Guid GameId { get; }
         private IReadOnlyList<Position> _lastPiecesFlipped;
         private Move _lastValidMove;
-        private bool _isGameFinished;
         private readonly ICollection<Player> _observers;
 
         public Game(BlackPlayer player) : this(player, new Board())
@@ -28,24 +28,24 @@ namespace Reversio.Domain
         {
             GameId = Guid.NewGuid();
             Board = board;
+            GameState = GameState.WaitingForOpponent;
+
             _blackPlayer = player;
             _discOfNextMove = DiscColor.Black;
             _lastPiecesFlipped = null;
             _lastValidMove = null;
-            _isGameFinished = false;
 
-            _observers = new List<Player>();
-            _observers.Add(player);
+            _observers = new List<Player> {player};
         }
 
-        public GameState CurrentState => new GameState(GameId, 
+        public GameStatus CurrentState => new GameStatus(GameId, 
+            GameState,
             Board, 
             _discOfNextMove, 
             _lastPiecesFlipped, 
             _lastValidMove, 
             _blackPlayer,
-            _whitePlayer,
-            _isGameFinished);
+            _whitePlayer);
 
 
         public event GameStateChangedHandler GameStateChanged;
@@ -64,6 +64,7 @@ namespace Reversio.Domain
 
             _whitePlayer = player;
             _observers.Add(player);
+            GameState = GameState.Playing;
             OnPlayerJoined();
         }
 
@@ -90,7 +91,7 @@ namespace Reversio.Domain
             var nextDisc = ToggleDisc(activePlayer);
             if (nextDisc == null)
             {
-                _isGameFinished = true;
+                GameState = GameState.Finished;
             }
 
             _lastValidMove = move;

@@ -47,6 +47,13 @@ const store = new Vuex.Store({
         .then(() => commit('SET_STATE', states.WAITING_ON_INVITATION_RESPONSE))
     },
 
+    JOIN_GAME: function ({commit}, game) {
+      return api.joinGame(game)
+        .then((response) => {
+          commit('START_GAME', response.data)
+        })
+    },
+
     LOAD_GAMES: function ({commit}) {
       return api.loadGames()
         .then((games) => {

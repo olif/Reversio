@@ -47,6 +47,11 @@ export default class Api {
     return axios.post('invite', opponent)
   }
 
+  joinGame (game) {
+    let uri = `${game.gameId}/join`
+    return axios.post(uri)
+  }
+
   _setToken (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }

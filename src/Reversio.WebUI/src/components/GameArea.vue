@@ -19,6 +19,7 @@
           <div v-if="activeGames.length > 0">
             <div class="item" v-for="game in activeGames">
               <div class="right floated content">
+                <button type="button" class="ui primary button" v-on:click="join(game, $event)" v-if="game.gameState.state == 'WaitingForOpponent'">Join</button>
                 <button type="button" class="ui primary button">Watch</button>
               </div>
               <i class="large circle middle aligned icon"></i>
@@ -107,6 +108,12 @@ export default {
           console.log(this.$store.state)
           this.$router.push({ name: 'game', params: { id: this.$store.state.activeGame.gameId } })
         })
+    },
+    join (game, e) {
+      this.$store.dispatch('JOIN_GAME', game)
+      .then(() => {
+        this.$router.push({ name: 'game', params: { id: this.$store.state.activeGame.gameId } })
+      })
     },
     invite (player, e) {
     }

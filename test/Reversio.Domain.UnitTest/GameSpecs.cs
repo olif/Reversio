@@ -1,20 +1,36 @@
 ﻿using System;
-using System.Diagnostics;
 using FluentAssertions;
 using Xunit;
-using FluentAssertions.Events;
 
 namespace Reversio.Domain.UnitTest
 {
     public class GameSpecs
     {
-        private BlackPlayer _blackPlayer;
-        private WhitePlayer _whitePlayer;
+        private readonly BlackPlayer _blackPlayer;
+        private readonly WhitePlayer _whitePlayer;
 
         public GameSpecs()
         {
             _blackPlayer = new BlackPlayer("player1");
             _whitePlayer = new WhitePlayer("player2");
+        }
+
+        [Fact]
+        public void GameState_Is_Set_To_WaitingForOpponent_When_New_Game_Is_Created()
+        {
+            var game = new Game(_blackPlayer);
+
+            game.GameState.Should().Be(GameState.WaitingForOpponent);
+        }
+
+        [Fact]
+        public void GameState_Is_Set_To_Playing_When_Opponent_Has_Joined()
+        {
+            var game = new Game(_blackPlayer);
+            game.JoinOpponent(_whitePlayer);
+
+            game.GameState.Should().Be(GameState.Playing);
+
         }
 
         [Fact]
@@ -84,7 +100,7 @@ namespace Reversio.Domain.UnitTest
         [Fact]
         public void GameIsFinished_If_No_Moves_Are_Left()
         {
-            var gameFinished = false;
+            GameState gameState = null;
             var positions = new[,]
             {
 
@@ -110,11 +126,11 @@ namespace Reversio.Domain.UnitTest
             game.JoinOpponent(_whitePlayer);
             game.GameStateChanged += (o, observerId, e) =>
             {
-                gameFinished = e.CurrentState.IsGameFinished;
+                gameState = e.CurrentState.GameState;
             };
             game.PlayerMakesMove(_blackPlayer, new Position(0, 3));
 
-            gameFinished.Should().BeTrue();
+            gameState.Should().Be(GameState.Finished);
         }
     }
 }

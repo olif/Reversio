@@ -6,7 +6,7 @@ namespace Reversio.Domain.Events
 
     public class GameStartedEventArgs : EventArgs
     {
-        public GameStartedEventArgs(GameState currentState, ActivePlayer activePlayer)
+        public GameStartedEventArgs(GameStatus currentState, ActivePlayer activePlayer)
         {
             CurrentState = currentState;
             PlayerAssignedDisc = activePlayer.Disc;
@@ -14,6 +14,6 @@ namespace Reversio.Domain.Events
 
         public DiscColor PlayerAssignedDisc { get; set; }
 
-        public GameState CurrentState { get; set; }
+        public GameStatus CurrentState { get; set; }
     }
 }

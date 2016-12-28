@@ -76,8 +76,9 @@ namespace Reversio.Server
         }
 
         [HttpPost("{gameId:guid}/join")]
-        public IActionResult JoinGame(Guid gameId, Player player)
+        public IActionResult JoinGame(Guid gameId)
         {
+            var player = GetPlayer();
             var state = _gameEngine.JoinGame(gameId, player);
             return Ok(state);
         }

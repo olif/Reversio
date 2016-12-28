@@ -6,11 +6,11 @@ namespace Reversio.Domain.Events
 
     public class GameCreatedEventArgs : EventArgs
     {
-        public GameCreatedEventArgs(GameState currentState)
+        public GameCreatedEventArgs(GameStatus currentState)
         {
             CurrentState = currentState;
         }
 
-        public GameState CurrentState { get; set; }
+        public GameStatus CurrentState { get; set; }
     }
 }
