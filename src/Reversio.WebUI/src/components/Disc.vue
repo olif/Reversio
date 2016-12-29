@@ -15,7 +15,6 @@ export default {
         case 1:
           return 'white'
       }
-      console.log(this.discTypeNr)
     }
   }
 }
@@ -36,11 +35,11 @@ export default {
 
   .disc.black {
     background-color: #000;
-    box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2)
+    box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
   }
 
   .disc.white {
     background-color: #fff;
-    box-shadow: inset 0px 0px 0px 2px rgba(0,0,0,0.2)
+    box-shadow: inset 0px 0px 0px 2px rgba(0,0,0,0.2);
   }
 </style>

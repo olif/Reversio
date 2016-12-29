@@ -12,6 +12,7 @@ const states = {
   UNDEFINED: 'UNDEFINED',
   WAITING_FOR_PLAYER: 'WAITING_FOR_PLAYER',
   WAITING_ON_INVITATION_RESPONSE: 'WAITING_ON_INVITATION_RESPONSE',
+  RECEIVED_INVITATION: 'RECEIVED_INVITATION',
   NEW_GAME_STARTED: 'NEW_GAME_STARTED',
   PLAYING: 'PLAYING'
 }
@@ -32,12 +33,7 @@ const store = new Vuex.Store({
       blackPlayerStatus: null,
       whitePlayerStatus: null
     },
-    activeDisc: -1
-    /* activeGame: {
-      disc: 0,
-      state: [],
-      gameId: null
-    } */
+    activeDisc: 0
   },
 
   actions: {
@@ -51,6 +47,7 @@ const store = new Vuex.Store({
       return api.joinGame(game)
         .then((response) => {
           commit('START_GAME', response.data)
+          commit('SET_STATE', states.PLAYING)
         })
     },
 
@@ -72,6 +69,10 @@ const store = new Vuex.Store({
       return api.makeMove(state.activeGame.gameId, move)
     },
 
+    INVITATION_RECEIVED: function ({commit}) {
+      commit('SET_STATE', states.INVITATION_RECEIVED)
+    },
+
     SIGN_IN: function ({ commit }, username) {
       return new Promise((resolve, reject) => {
         api.signin(username)
@@ -91,10 +92,13 @@ const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         api.signinAsGuest()
           .then((token) => {
-            console.log(token)
+            api.getUserInfo()
+              .then((response) => {
+                commit('SET_USER', response.data)
+                resolve()
+              })
             document.cookie = `access_token=${token}`
             socketHandler.connect(token)
-            resolve()
           })
           .catch((error) => {
             console.log('det sket sig')
@@ -107,6 +111,7 @@ const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         api.createNewGame().then((game) => {
           commit('START_GAME', game.data)
+          commit('SET_STATE', state.PLAYING)
           resolve(game.data)
         })
         .catch((error) => {
@@ -152,8 +157,14 @@ const store = new Vuex.Store({
 
     START_GAME: (state, gameStarted) => {
       state.activeGame = gameStarted
-      state.activeColor = -1
-      state.currentState = states.PLAYING
+      if (gameStarted.blackPlayerStatus.name === state.signedInUser) {
+        state.activeDisc = -1
+      } else if (gameStarted.whitePlayerStatus.name === state.signedInUser) {
+        state.activeDisc = 1
+      } else {
+        throw new Error('Could not determine disc color')
+      }
+
       /* state.activeGame.discColor = gameStartedState.playerAssignedDisc
       state.activeGame.state = gameStartedState.currentState
       state.activeGame.gameId = gameStartedState.currentState.gameId

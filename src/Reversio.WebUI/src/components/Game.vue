@@ -21,7 +21,7 @@ import Disc from './Disc'
         </div>
       </div>
     </div>
-    <table class="game-board">
+    <table class="game-board" v-bind:class="getBoardColor">
       <tr v-for="(col, i) in board">
         <td v-for="(row, j) in col" @click="makeMove(i, j)">
           <disc :discTypeNr="row"></disc>
@@ -49,6 +49,10 @@ export default {
     },
     whitePlayer: function () {
       return this.$store.state.activeGame.whitePlayerStatus
+    },
+    getBoardColor: function () {
+      console.log(this.$store.state.activeDisc)
+      return this.$store.state.activeDisc === -1 ? 'black-player-table' : 'white-player-table'
     }
   },
   components: {
@@ -73,6 +77,16 @@ export default {
     margin: 0 auto;
     border-collapse: collapse;
     border: 1px solid #206040;
+
+    &.black-player-table td:hover .disc.empty {
+      background-color: rgba(0, 0, 0, 0.4);
+      box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
+    }
+
+    &.white-player-table td:hover .disc.empty {
+      background-color: rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
+    }
 
     td {
       text-align: center;

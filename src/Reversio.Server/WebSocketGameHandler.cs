@@ -23,7 +23,9 @@ namespace Reversio.Server
             _gameEngine.GameStarted += OnGameStarted;
             _gameEngine.GameStateChanged += OnGameStateChanged;
             _gameEngine.GameInvitationDeclined += OnGameInvitationDeclined;
+            _gameEngine.PlayerInvitedToNewGame += OnPlayerInvitedToNewGame;
         }
+
 
         protected override void OnConnectionClosed(IWebSocketConnection conn)
         {
@@ -56,10 +58,17 @@ namespace Reversio.Server
             }
         }
 
+        private void OnPlayerInvitedToNewGame(object sender, InvitationEventArgs e)
+        {
+            var conn = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == e.Invitee.Name).Value;
+            var msg = Message.InvitePlayerToGame(e);
+            conn?.Send(msg.ToJson());
+       }
+
         private void OnGameInvitationDeclined(object sender, InvitationEventArgs e)
         {
             var conn = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == e.Invitee.Name).Value;
-            var msg = Message.InvitationDeclined;
+            var msg = Message.InvitationDeclined(e);
             conn?.Send(msg.ToJson());
         }
 

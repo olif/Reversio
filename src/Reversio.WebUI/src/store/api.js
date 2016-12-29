@@ -37,6 +37,10 @@ export default class Api {
     })
   }
 
+  getUserInfo () {
+    return axios.get('user')
+  }
+
   /**
    * Invites another player to a game
    *

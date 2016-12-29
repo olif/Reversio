@@ -12,10 +12,11 @@ namespace Reversio.Server
 {
     public class Message
     {
-        public static Message GameStateChangedMessage(GameStateChangedEventArgs eventArgs) => new Message(Server.MessageType.GameStateChanged, eventArgs);
-        public static Message GameCreated(GameCreatedEventArgs eventArgs) => new Message(Server.MessageType.NewGameCreated, eventArgs);
-        public static Message GameStarted(GameStartedEventArgs eventArgs) => new Message(Server.MessageType.GameStarted, eventArgs);
-        public static Message InvitationDeclined => new Message(Server.MessageType.GameInvitationDeclined, string.Empty);
+        public static Message GameStateChangedMessage(GameStateChangedEventArgs e) => new Message(Server.MessageType.GameStateChanged, e);
+        public static Message GameCreated(GameCreatedEventArgs e) => new Message(Server.MessageType.NewGameCreated, e);
+        public static Message GameStarted(GameStartedEventArgs e) => new Message(Server.MessageType.GameStarted, e);
+        public static Message InvitationDeclined(InvitationEventArgs e) => new Message(Server.MessageType.GameInvitationDeclined, e);
+        public static Message InvitePlayerToGame(InvitationEventArgs e) => new Message(Server.MessageType.GameInvitation, e);
 
         public string MessageType { get; set; }
 
