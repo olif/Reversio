@@ -157,5 +157,51 @@ namespace Reversio.Domain.UnitTest
             playerInvited.Should().BeTrue();
             newGameStarted.Should().BeTrue();
         }
+
+        [Fact]
+        public void When_game_is_finished_it_is_removed()
+        {
+            var positions = new char[8, 8]
+            {
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', 'X', ' ', 'X', ' ', ' ', ' '},
+
+                {' ', ' ', 'X', 'O', 'X', ' ', ' ', ' '},
+
+                {' ', ' ', 'X', 'X', 'X', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            };
+
+            bool isFinished = false;
+            var board = new Board(positions.Translate());
+            var blackPlayer = new BlackPlayer("black");
+            var whitePlayer = new WhitePlayer("white");
+            _sut.RegisterPlayer(blackPlayer);
+            _sut.RegisterPlayer(whitePlayer);
+            var game = new Game(blackPlayer, board);
+            game.JoinOpponent(whitePlayer);
+            _sut.AddGame(game);
+            _sut.GameStateChanged += (sender, participant, args) =>
+            {
+                if (game.GameId == args.CurrentState.GameId)
+                {
+                    isFinished = args.CurrentState.GameState == GameState.Finished;
+                }
+            };
+
+            var finishedState = _sut.MakeMove(game.GameId, blackPlayer, new Position(3, 2));
+
+            finishedState.Should().NotBeEmpty();
+            isFinished.Should().BeTrue();
+            _sut.ActiveGames.Should().NotContain(x => x.GameId == game.GameId);
+        }
     }
 }

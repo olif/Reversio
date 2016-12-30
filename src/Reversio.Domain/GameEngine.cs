@@ -26,6 +26,11 @@ namespace Reversio.Domain
         {
         }
 
+        private GameEngine(ICollection<Game> initGames)
+        {
+            
+        }
+
         public IReadOnlyList<GameStatus> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
 
         public IReadOnlyList<Player> RegisteredPlayers => _registeredPlayers.Values.ToList().AsReadOnly();
@@ -116,10 +121,30 @@ namespace Reversio.Domain
             var game = new Game(blackPlayer);
             game.GameStateChanged += (e, observerId, args) =>
             {
-                GameStateChanged?.Invoke(this, observerId, args);
+                OnGameChanged(observerId, args);
             };
             _activeGames.Add(game.GameId, game);
             return game.CurrentState;
+        }
+
+        internal GameStatus AddGame(Game game)
+        {
+            game.GameStateChanged += (e, observerId, args) =>
+            {
+                OnGameChanged(observerId, args);
+            };
+            _activeGames.Add(game.GameId, game);
+            return game.CurrentState;
+        }
+
+        private void OnGameChanged(Player observerId, GameStateChangedEventArgs args)
+        {
+            if (args.CurrentState.GameState == GameState.Finished)
+            {
+                _activeGames.Remove(args.CurrentState.GameId);
+            }
+
+            GameStateChanged?.Invoke(this, observerId, args);
         }
 
         public GameStatus JoinGame(Guid gameId, Player player)

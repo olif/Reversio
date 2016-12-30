@@ -39,7 +39,7 @@ const store = new Vuex.Store({
   actions: {
 
     INVITE_PLAYER: function ({commit}, opponent) {
-      return api.invitePlayer(opponent)
+      return api.invitePlayer({opponent: opponent})
         .then(() => commit('SET_STATE', states.WAITING_ON_INVITATION_RESPONSE))
     },
 
@@ -111,7 +111,7 @@ const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         api.createNewGame().then((game) => {
           commit('START_GAME', game.data)
-          commit('SET_STATE', state.PLAYING)
+          commit('SET_STATE', states.PLAYING)
           resolve(game.data)
         })
         .catch((error) => {
@@ -207,7 +207,18 @@ const store = new Vuex.Store({
   },
 
   getters: {
-    currentState: state => state
+    currentState: state => state,
+    opponent: state => {
+      console.log(state.currentState)
+      if (state.currentState === states.PLAYING) {
+        console.log('hej')
+        if (state.signedInUser === state.activeGame.blackPlayerStatus.name) {
+          return {name: state.activeGame.whitePlayerStatus.name}
+        } else {
+          return {name: state.activeGame.blackPlayerStatus.name}
+        }
+      }
+    }
   }
 })
 

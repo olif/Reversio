@@ -1,12 +1,20 @@
 /* global URLSearchParams */
 import axios from 'axios'
+import jscookie from 'js-cookie'
 
 axios.defaults.baseURL = 'http://localhost:5000/api'
 
 export default class Api {
 
   constructor () {
-    this.accessToken = null
+    let token = jscookie.get('access_token')
+    if (token !== null) {
+      this.accessToken = token
+      this._setToken(token)
+    } else {
+      this.accessToken = null
+    }
+    console.log(this.accessToken)
   }
   
   createNewGame () {

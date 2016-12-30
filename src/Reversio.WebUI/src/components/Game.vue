@@ -20,7 +20,12 @@ import Disc from './Disc'
           </div>
         </div>
       </div>
-    </div>
+      <div class="item">
+        <div class="content">
+          <button v-on:click="showModal()">Show modal</button>
+        </div>
+      </div>
+    </div>  
     <table class="game-board" v-bind:class="getBoardColor">
       <tr v-for="(col, i) in board">
         <td v-for="(row, j) in col" @click="makeMove(i, j)" v-on:mouseover="hover(i, j, row, $event)" v-on:mouseleave="leave(i, j, $event)">
@@ -29,10 +34,78 @@ import Disc from './Disc'
       </tr>
     </table>
   </div>
+ 
+  <div class="ui basic modal">
+    <div class="header">
+      You won!
+    </div>
+    <div class="content">
+      <p>{{blackPlayer.score}} - {{whitePlayer.score}}</p>
+      <p>Do you want to play a rematch?</p>
+    </div>
+    <div class="actions">
+      <div class="ui deny red basic inverted button">
+        <i class="remove icon"></i>
+        No
+      </div>
+      <div class="ui ok green basic inverted button" v-on:click="inviteToRematch()">
+        <i class="checkmark icon"></i>
+        Yes
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script>
 import Disc from './Disc'
+import $ from 'jquery'
+
+export default {
+  methods: {
+    makeMove: function (i, j) {
+      this.$store.dispatch('MAKE_MOVE', {y: i, x: j})
+    },
+    hover: function (i, j, color, e) {
+      if (checkIfValidMove(this.$store.state.activeGame.currentState, [i, j], this.$store.state.activeDisc) && this.isPlayersTurn()) {
+        let elem = e.target
+        elem.classList.add('hover')
+      }
+    },
+    inviteToRematch: function () {
+      this.$store.dispatch('INVITE_PLAYER', this.$store.getters.opponent)
+    },
+    isPlayersTurn: function () {
+      return this.$store.state.activeGame.discOfNextMove.color === this.$store.state.activeDisc
+    },
+    leave: function (i, j, e) {
+      let elem = e.target
+      elem.classList.remove('hover')
+    },
+    showModal: function () {
+      $('.modal')
+        .modal('setting', 'closable', false)
+        .modal('show')
+    }
+  },
+  computed: {
+    board: function () {
+      return this.$store.state.activeGame.currentState
+    },
+    blackPlayer: function () {
+      return this.$store.state.activeGame.blackPlayerStatus
+    },
+    whitePlayer: function () {
+      return this.$store.state.activeGame.whitePlayerStatus
+    },
+    getBoardColor: function () {
+      return this.$store.state.activeDisc === -1 ? 'black-player-table' : 'white-player-table'
+    }
+  },
+  components: {
+    'disc': Disc
+  }
+}
 
 let directions = [
     [0, -1],
@@ -77,43 +150,6 @@ function checkIfValidMove (board, position, color) {
   return false
 }
 
-export default {
-  methods: {
-    makeMove: function (i, j) {
-      this.$store.dispatch('MAKE_MOVE', {y: i, x: j})
-    },
-    hover: function (i, j, color, e) {
-      if (checkIfValidMove(this.$store.state.activeGame.currentState, [i, j], this.$store.state.activeDisc) && this.isPlayersTurn()) {
-        let elem = e.target
-        elem.classList.add('hover')
-      }
-    },
-    isPlayersTurn: function () {
-      return this.$store.state.activeGame.discOfNextMove.color === this.$store.state.activeDisc
-    },
-    leave: function (i, j, e) {
-      let elem = e.target
-      elem.classList.remove('hover')
-    }
-  },
-  computed: {
-    board: function () {
-      return this.$store.state.activeGame.currentState
-    },
-    blackPlayer: function () {
-      return this.$store.state.activeGame.blackPlayerStatus
-    },
-    whitePlayer: function () {
-      return this.$store.state.activeGame.whitePlayerStatus
-    },
-    getBoardColor: function () {
-      return this.$store.state.activeDisc === -1 ? 'black-player-table' : 'white-player-table'
-    }
-  },
-  components: {
-    'disc': Disc
-  }
-}
 </script>
 
 <style lang="scss" scoped>

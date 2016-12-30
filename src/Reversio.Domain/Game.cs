@@ -5,7 +5,6 @@ using Reversio.Domain.Events;
 
 namespace Reversio.Domain
 {
-
     /// <summary>
     /// Represents an ongoing game
     /// </summary>

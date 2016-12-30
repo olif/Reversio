@@ -56,7 +56,7 @@ namespace Reversio.Server
         }
 
         [HttpPost("invite")]
-        public IActionResult InviteOpponent(GameInvitationModel invitation)
+        public IActionResult InviteOpponent([FromBody] GameInvitationModel invitation)
         {
             Player player = GetPlayer();
             var isChallangeSent = _gameEngine.TryInvitePlayerToGame(player, invitation.Opponent);
