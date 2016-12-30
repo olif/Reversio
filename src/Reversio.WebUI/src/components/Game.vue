@@ -8,6 +8,7 @@ import Disc from './Disc'
         <i class="large square icon"></i>
         <div class="content">
           <div class="header">
+            <span v-if="blackPlayer !== null">
             {{blackPlayer.name}} [{{blackPlayer.score}}]
           </div>
         </div>
@@ -16,7 +17,9 @@ import Disc from './Disc'
         <i class="large square outline icon"></i>
         <div class="content">
           <div class="header">
-            {{whitePlayer.name}} [{{whitePlayer.score}}]
+            <span v-if="whitePlayer !== null">
+              {{whitePlayer.name}} [{{whitePlayer.score}}]
+            </span>
           </div>
         </div>
       </div>
@@ -40,7 +43,7 @@ import Disc from './Disc'
       You won!
     </div>
     <div class="content">
-      <p>{{blackPlayer.score}} - {{whitePlayer.score}}</p>
+      <p v-if="blackPlayer !== null && whitePlayer !== null">{{blackPlayer.score}} - {{whitePlayer.score}}</p>
       <p>Do you want to play a rematch?</p>
     </div>
     <div class="actions">
@@ -67,7 +70,7 @@ export default {
       this.$store.dispatch('MAKE_MOVE', {y: i, x: j})
     },
     hover: function (i, j, color, e) {
-      if (checkIfValidMove(this.$store.state.activeGame.currentState, [i, j], this.$store.state.activeDisc) && this.isPlayersTurn()) {
+      if (checkIfValidMove(this.$store.state.activeGame.currentState, [i, j], this.$store.getters.currentDiscColor) && this.isPlayersTurn()) {
         let elem = e.target
         elem.classList.add('hover')
       }
@@ -76,7 +79,7 @@ export default {
       this.$store.dispatch('INVITE_PLAYER', this.$store.getters.opponent)
     },
     isPlayersTurn: function () {
-      return this.$store.state.activeGame.discOfNextMove.color === this.$store.state.activeDisc
+      return this.$store.state.activeGame.discOfNextMove.color === this.$store.getters.currentDiscColor
     },
     leave: function (i, j, e) {
       let elem = e.target
@@ -99,11 +102,23 @@ export default {
       return this.$store.state.activeGame.whitePlayerStatus
     },
     getBoardColor: function () {
-      return this.$store.state.activeDisc === -1 ? 'black-player-table' : 'white-player-table'
+      console.log(this.$store.getters.currentDiscColor)
+      let boardColor = this.$store.getters.currentDiscColor === -1 ? 'black-player-table' : 'white-player-table'
+      console.log(boardColor)
+      return boardColor
     }
   },
   components: {
     'disc': Disc
+  },
+  beforeMount () {
+    if (this.$store.state.signedInUser === null) {
+      this.$store.dispatch('LOAD_USER')
+    }
+    if (this.$store.state.activeGame.gameId === '') {
+      let gameId = this.$router.currentRoute.params.id
+      this.$store.dispatch('LOAD_GAME', gameId)
+    }
   }
 }
 

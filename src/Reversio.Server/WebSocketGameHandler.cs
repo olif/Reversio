@@ -26,7 +26,6 @@ namespace Reversio.Server
             _gameEngine.PlayerInvitedToNewGame += OnPlayerInvitedToNewGame;
         }
 
-
         protected override void OnConnectionClosed(IWebSocketConnection conn)
         {
             var entry = _activeSessions.FirstOrDefault(x => x.Value.Id == conn.Id);

@@ -47,6 +47,18 @@ namespace Reversio.Server
             return Ok(otherPlayers);
         }
 
+        [HttpGet("games/{gameId:guid}")]
+        public IActionResult GetGameStatus(Guid gameId)
+        {
+            var game = _gameEngine.ActiveGames.FirstOrDefault(x => x.GameId == gameId);
+            if (game != null)
+            {
+                return Ok(game);
+            }
+
+            return NotFound($"Could not find game with gameId: {gameId}");
+        }
+
         [HttpPost("games/new")]
         public IActionResult CreateNewGame()
         {

@@ -6,8 +6,6 @@ import SocketHandler from './socket'
 
 Vue.use(Vuex)
 
-const api = new Api()
-
 const states = {
   UNDEFINED: 'UNDEFINED',
   WAITING_FOR_PLAYER: 'WAITING_FOR_PLAYER',
@@ -51,6 +49,13 @@ const store = new Vuex.Store({
         })
     },
 
+    LOAD_GAME: function ({commit}, gameId) {
+      return api.loadGame(gameId)
+        .then((response) => {
+          commit('SET_GAME', response.data)
+        })
+    },
+
     LOAD_GAMES: function ({commit}) {
       return api.loadGames()
         .then((games) => {
@@ -63,6 +68,17 @@ const store = new Vuex.Store({
         .then((players) => {
           commit('SET_PLAYERS', players.data)
         })
+    },
+
+    LOAD_USER: function ({commit}) {
+      return new Promise((resolve, reject) => {
+        api.loadUser()
+         .then((response) => {
+           commit('SET_USER', response.data)
+           console.log('resolved')
+           resolve()
+         })
+      })
     },
 
     MAKE_MOVE: function ({commit, state}, move) {
@@ -146,10 +162,16 @@ const store = new Vuex.Store({
 
     SET_USER: (state, user) => {
       state.signedInUser = user
+      console.log('user set')
     },
 
     SET_ACTIVE_GAMES: (state, games) => {
       state.activeGames = games
+    },
+
+    SET_GAME: (state, gameState) => {
+      state.activeGame = gameState
+      console.log('game set')
     },
 
     SET_PLAYERS: (state, players) => {
@@ -207,11 +229,21 @@ const store = new Vuex.Store({
   },
 
   getters: {
+    currentDiscColor: state => {
+      if (state.signedInUser !== null && state.activeGame.blackPlayerStatus !== null &&
+            state.activeGame.blackPlayerStatus.name === state.signedInUser) {
+        return -1
+      } else if (state.signedInUser !== null && state.activeGame.whitePlayerStatus &&
+          state.activeGame.whitePlayerStatus.name === state.signedInUser) {
+        return 1
+      } else {
+        return 0
+      }
+    },
     currentState: state => state,
     opponent: state => {
       console.log(state.currentState)
       if (state.currentState === states.PLAYING) {
-        console.log('hej')
         if (state.signedInUser === state.activeGame.blackPlayerStatus.name) {
           return {name: state.activeGame.whitePlayerStatus.name}
         } else {
@@ -222,5 +254,9 @@ const store = new Vuex.Store({
   }
 })
 
+const api = new Api()
 const socketHandler = new SocketHandler(store)
+if (api.accessToken) {
+  socketHandler.connect(api.accessToken)
+}
 export default store

@@ -14,7 +14,6 @@ export default class Api {
     } else {
       this.accessToken = null
     }
-    console.log(this.accessToken)
   }
   
   createNewGame () {
@@ -71,9 +70,17 @@ export default class Api {
   loadGames () {
     return axios.get('active')
   }
+
+  loadGame (gameId) {
+    return axios.get(`games/${gameId}`)
+  }
   
   loadPlayers () {
     return axios.get('players')
+  }
+
+  loadUser () {
+    return axios.get('user')
   }
   
   makeMove (gameId, move) {

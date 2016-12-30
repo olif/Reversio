@@ -21,14 +21,12 @@ namespace Reversio.Domain
         public event GameInvitationHandler GameInvitationDeclined;
 
         public static GameEngine Instance = new GameEngine();
-
+        
         private GameEngine()
-        {
-        }
+        { }
 
         private GameEngine(ICollection<Game> initGames)
         {
-            
         }
 
         public IReadOnlyList<GameStatus> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
