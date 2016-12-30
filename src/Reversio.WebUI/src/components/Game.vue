@@ -23,7 +23,7 @@ import Disc from './Disc'
     </div>
     <table class="game-board" v-bind:class="getBoardColor">
       <tr v-for="(col, i) in board">
-        <td v-for="(row, j) in col" @click="makeMove(i, j)">
+        <td v-for="(row, j) in col" @click="makeMove(i, j)" v-on:mouseover="hover(i, j, row, $event)" v-on:mouseleave="leave(i, j, $event)">
           <disc :discTypeNr="row"></disc>
         </td>
       </tr>
@@ -34,10 +34,66 @@ import Disc from './Disc'
 <script>
 import Disc from './Disc'
 
+let directions = [
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1]]
+
+function checkIfValidMove (board, position, color) {
+  let isCandidate = false
+
+  for (let i = 0; i < 8; i++) {
+    let xPos = position[0]
+    let yPos = position[1]
+    let xStep = directions[i][0]
+    let yStep = directions[i][1]
+
+    for (let j = 0; j < 8; j++) {
+      xPos += xStep
+      yPos -= yStep
+
+      if (xPos >= 8 || xPos < 0 || yPos >= 8 || yPos < 0 || board[xPos][yPos] === 0) {
+        isCandidate = false
+        break
+      }
+
+      if (board[xPos][yPos] === color) {
+        break
+      }
+
+      isCandidate = true 
+    }
+
+    if (isCandidate === true) {
+      return true
+    }
+  }
+
+  return false
+}
+
 export default {
   methods: {
     makeMove: function (i, j) {
       this.$store.dispatch('MAKE_MOVE', {y: i, x: j})
+    },
+    hover: function (i, j, color, e) {
+      if (checkIfValidMove(this.$store.state.activeGame.currentState, [i, j], this.$store.state.activeDisc) && this.isPlayersTurn()) {
+        let elem = e.target
+        elem.classList.add('hover')
+      }
+    },
+    isPlayersTurn: function () {
+      return this.$store.state.activeGame.discOfNextMove.color === this.$store.state.activeDisc
+    },
+    leave: function (i, j, e) {
+      let elem = e.target
+      elem.classList.remove('hover')
     }
   },
   computed: {
@@ -51,7 +107,6 @@ export default {
       return this.$store.state.activeGame.whitePlayerStatus
     },
     getBoardColor: function () {
-      console.log(this.$store.state.activeDisc)
       return this.$store.state.activeDisc === -1 ? 'black-player-table' : 'white-player-table'
     }
   },
@@ -78,12 +133,12 @@ export default {
     border-collapse: collapse;
     border: 1px solid #206040;
 
-    &.black-player-table td:hover .disc.empty {
+    &.black-player-table td.hover .disc.empty {
       background-color: rgba(0, 0, 0, 0.4);
       box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
     }
 
-    &.white-player-table td:hover .disc.empty {
+    &.white-player-table td.hover .disc.empty {
       background-color: rgba(255, 255, 255, 0.4);
       box-shadow: inset 0px 0px 0px 2px rgba(255,255,255,0.2);
     }

@@ -131,6 +131,7 @@ const store = new Vuex.Store({
       for (let disc of gameState.currentState.discsFlipped) {
         commit('UPDATE_POSITION', disc)
       }
+      commit('UPDATE_NEXT_MOVE', gameState.currentState.discOfNextMove)
       commit('UPDATE_SCORES', [gameState.currentState.blackPlayerStatus.score, gameState.currentState.whitePlayerStatus.score])
     }
 
@@ -181,6 +182,10 @@ const store = new Vuex.Store({
       let discColor = disc.disc.color
       let row = state.activeGame.currentState[i]
       row.splice(j, 1, discColor)
+    },
+
+    UPDATE_NEXT_MOVE: (state, disc) => {
+      state.activeGame.discOfNextMove = disc
     },
 
     UPDATE_POSITION: (state, position) => {
