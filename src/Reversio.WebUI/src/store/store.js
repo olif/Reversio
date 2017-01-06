@@ -19,6 +19,7 @@ const store = new Vuex.Store({
   state: {
     signedInUser: null,
     currentState: states.UNDEFINED,
+    invitee: null,
     activeGames: [],
     opponents: [],
     activeGame: {
@@ -35,6 +36,12 @@ const store = new Vuex.Store({
   },
 
   actions: {
+
+    GAME_INVITATION_RECEIVED: function ({commit}, invitee) {
+      console.log(invitee)
+      commit('SET_STATE', states.RECEIVED_INVITATION)
+      commit('SET_INVITEE', invitee)
+    },
 
     INVITE_PLAYER: function ({commit}, opponent) {
       return api.invitePlayer({opponent: opponent})
@@ -85,10 +92,6 @@ const store = new Vuex.Store({
       return api.makeMove(state.activeGame.gameId, move)
     },
 
-    INVITATION_RECEIVED: function ({commit}) {
-      commit('SET_STATE', states.INVITATION_RECEIVED)
-    },
-
     SIGN_IN: function ({ commit }, username) {
       return new Promise((resolve, reject) => {
         api.signin(username)
@@ -136,33 +139,15 @@ const store = new Vuex.Store({
       })
     },
 
-    /* START_GAME: function ({commit}, gameStartedState) {
-      commit('START_GAME', gameStartedState)
-      console.log(gameStartedState)
-      router.push({ name: 'game', params: { id: gameStartedState.currentState.gameId } })
-    }, */
-
     UPDATE_GAME_STATE: function ({commit}, gameState) {
-      commit('PLACE_DISC', gameState.currentState.lastValidMove)
-      for (let disc of gameState.currentState.discsFlipped) {
-        commit('UPDATE_POSITION', disc)
-      }
-      commit('UPDATE_NEXT_MOVE', gameState.currentState.discOfNextMove)
-      commit('UPDATE_SCORES', [gameState.currentState.blackPlayerStatus.score, gameState.currentState.whitePlayerStatus.score])
+      commit('UPDATE_GAME_STATE', gameState.currentState)
     }
-
-    /* wait_for_player: function ({commit}) {
-      api.startrandomgame().then(() => {
-        commit('set_state', states.waiting_for_player)
-      })
-    } */
   },
 
   mutations: {
 
     SET_USER: (state, user) => {
       state.signedInUser = user
-      console.log('user set')
     },
 
     SET_ACTIVE_GAMES: (state, games) => {
@@ -171,7 +156,10 @@ const store = new Vuex.Store({
 
     SET_GAME: (state, gameState) => {
       state.activeGame = gameState
-      console.log('game set')
+    },
+
+    SET_INVITEE: (state, invitee) => {
+      state.invitee = invitee
     },
 
     SET_PLAYERS: (state, players) => {
@@ -179,6 +167,7 @@ const store = new Vuex.Store({
     },
 
     START_GAME: (state, gameStarted) => {
+      console.log('game started')
       state.activeGame = gameStarted
       if (gameStarted.blackPlayerStatus.name === state.signedInUser) {
         state.activeDisc = -1
@@ -187,48 +176,45 @@ const store = new Vuex.Store({
       } else {
         throw new Error('Could not determine disc color')
       }
-
-      /* state.activeGame.discColor = gameStartedState.playerAssignedDisc
-      state.activeGame.state = gameStartedState.currentState
-      state.activeGame.gameId = gameStartedState.currentState.gameId
-      state.currentState = states.PLAYING */
     },
 
     SET_STATE: (state, newState) => {
       state.currentState = newState
     },
 
-    PLACE_DISC: (state, disc) => {
-      let i = disc.position.y
-      let j = disc.position.x
-      let discColor = disc.disc.color
-      let row = state.activeGame.currentState[i]
-      row.splice(j, 1, discColor)
-    },
-
-    UPDATE_NEXT_MOVE: (state, disc) => {
-      state.activeGame.discOfNextMove = disc
-    },
-
-    UPDATE_POSITION: (state, position) => {
-      let i = position.y
-      let j = position.x
-      let row = state.activeGame.currentState[i]
-      let disc = row[j]
-      row.splice(j, 1, disc * -1)
-    },
-
-    UPDATE_SCORES: (state, scores) => {
-      state.activeGame.blackPlayerStatus.score = scores[0]
-      state.activeGame.whitePlayerStatus.score = scores[1]
-    },
-
     UPDATE_GAME_STATE: (state, gameState) => {
-      state.activeGame.state = gameState
+      // Place disc
+      let move = gameState.lastValidMove
+      if (move !== undefined) {
+        let i = move.position.y
+        let j = move.position.x
+        let discColor = move.disc.color
+        let row = state.activeGame.currentState[i]
+        row.splice(j, 1, discColor)
+      }
+
+      for (let flippedDisc of gameState.discsFlipped) {
+        let i = flippedDisc.y
+        let j = flippedDisc.x
+        let row = state.activeGame.currentState[i]
+        let disc = row[j]
+        row.splice(j, 1, disc * -1)
+      }
+
+      // Update next move
+      console.log(gameState.discOfNextMove)
+      state.activeGame.discOfNextMove = gameState.discOfNextMove
+
+      // Update user info
+      state.activeGame.blackPlayerStatus.name = gameState.blackPlayerStatus.name
+      state.activeGame.blackPlayerStatus.score = gameState.blackPlayerStatus.score
+      state.activeGame.whitePlayerStatus.name = gameState.whitePlayerStatus.name
+      state.activeGame.whitePlayerStatus.score = gameState.whitePlayerStatus.score
     }
-  },
+  },  
 
   getters: {
+
     currentDiscColor: state => {
       if (state.signedInUser !== null && state.activeGame.blackPlayerStatus !== null &&
             state.activeGame.blackPlayerStatus.name === state.signedInUser) {
@@ -240,7 +226,9 @@ const store = new Vuex.Store({
         return 0
       }
     },
+
     currentState: state => state,
+    
     opponent: state => {
       console.log(state.currentState)
       if (state.currentState === states.PLAYING) {
@@ -251,6 +239,7 @@ const store = new Vuex.Store({
         }
       }
     }
+    
   }
 })
 

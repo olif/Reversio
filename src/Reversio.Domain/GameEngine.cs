@@ -22,10 +22,10 @@ namespace Reversio.Domain
 
         public static GameEngine Instance = new GameEngine();
         
-        private GameEngine()
+        public GameEngine()
         { }
 
-        private GameEngine(ICollection<Game> initGames)
+        public GameEngine(ICollection<Game> initGames)
         {
         }
 
@@ -44,6 +44,14 @@ namespace Reversio.Domain
             if(_activeGames.Any(x => x.Value.HasPlayer(opponent)))
             {
                 return false;
+            }
+
+            // Check if the opponent has made an invitation to the inviter
+            if (_invitations.Any(x => x.Item1 == opponent))
+            {
+                StartNewGame(inviter, opponent);
+                _invitations.Remove(new Tuple<Player, Player>(opponent, inviter));
+                return true;
             }
 
             _invitations.Add(new Tuple<Player, Player>(inviter, opponent));

@@ -15,7 +15,7 @@ export default class Api {
       this.accessToken = null
     }
   }
-  
+
   createNewGame () {
     return axios.post('games/new')
   }

@@ -11,7 +11,7 @@ namespace Reversio.Domain.UnitTest
 
         public GameEngineSpecs()
         {
-            _sut = GameEngine.Instance;
+            _sut = new GameEngine();
         }
 
         [Fact]
@@ -202,6 +202,29 @@ namespace Reversio.Domain.UnitTest
             finishedState.Should().NotBeEmpty();
             isFinished.Should().BeTrue();
             _sut.ActiveGames.Should().NotContain(x => x.GameId == game.GameId);
+        }
+
+        [Fact]
+        public void When_An_Invitation_Is_Sent_To_A_Player_And_The_Player_Already_Has_Sent_An_Invitation_Starts_A_Game()
+        {
+            bool gameStarted = false;
+            var blackPlayer = new BlackPlayer("invA");
+            var whitePlayer = new WhitePlayer("invB");
+            _sut.RegisterPlayer(blackPlayer);
+            _sut.RegisterPlayer(whitePlayer);
+            _sut.GameStarted += (sender, participant, args) =>
+            {
+                if (participant == blackPlayer || participant == whitePlayer)
+                {
+                    gameStarted = true;
+                }
+            };
+
+            _sut.TryInvitePlayerToGame(blackPlayer, whitePlayer);
+            _sut.TryInvitePlayerToGame(whitePlayer, blackPlayer);
+
+            gameStarted.Should().BeTrue();
+
         }
     }
 }

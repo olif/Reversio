@@ -17,7 +17,7 @@ export default class GameSocketHandler {
     console.log(msg)
 
     switch (msg.messageType) {
-      
+
       case 'reversio.event.gameStarted':
         console.log(msg.payload)
         this.store.dispatch('START_GAME', msg.payload)
@@ -25,6 +25,10 @@ export default class GameSocketHandler {
 
       case 'reversio.event.gameStateChanged':
         this.store.dispatch('UPDATE_GAME_STATE', msg.payload)
+        break
+
+      case 'reversio.event.gameInvitation':
+        this.store.dispatch('GAME_INVITATION_RECEIVED', msg.payload.invitee)
         break
 
       case 'reversio.event.gameInvitationDeclined':
