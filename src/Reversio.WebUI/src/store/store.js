@@ -288,7 +288,10 @@ const store = new Vuex.Store({
 
 const api = new Api()
 const socketHandler = new SocketHandler(store)
+// If the api has an accesstoken the user is already signed in
+// -> open websocket and load signed in user
 if (api.accessToken) {
   socketHandler.connect(api.accessToken)
+  store.dispatch('LOAD_USER')
 }
 export default store

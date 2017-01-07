@@ -1,36 +1,33 @@
 <template lang="html">
   <div class="gamearea-page ui container">
-    <h1>Games</h1>
-    <div class="ui grid">
-      <div class="right aligned three wide column ">
+
+    <h1 class="ui center aligned header">Games</h1>
+
+    <div class="ui relaxed grid">
+      <div class="right aligned two wide column ">
         <h3>Controls</h3>
         <div class="ui compact vertical labeled icon menu">
-          <a class="item" v-on:click.prevent="startNewGame">
+          <a class="teal item" v-on:click.prevent="startNewGame">
             <i class="gamepad icon"></i>
             Start new game
           </a>
         </div>
       </div>
       
-      <div class="eight wide column">
+      <div class="ten wide column">
         <h3>Current games</h3>
-        <div class="ui relaxed divided list">
-          
-          <div v-if="activeGames.length > 0">
-            <div class="item" v-for="game in activeGames">
-              <div class="right floated content">
-                <button type="button" class="ui primary button" v-on:click="join(game, $event)" v-if="game.gameState.state == 'WaitingForOpponent'">Join</button>
-                <button type="button" class="ui primary button">Watch</button>
-              </div>
-              <i class="large circle middle aligned icon"></i>
-              <div class="content">
-                <a class="header">
-                  {{game.blackPlayerStatus.name}} [{{game.blackPlayerStatus.score}}] 
-                  - 
-                  {{game.whitePlayerStatus.name}} [{{game.whitePlayerStatus.score}}]
-                </a>
-                <div class="description">
-                </div>
+        <div class="ui middle aligned divided list games" v-if="activeGames.length > 0">
+          <div class="item" v-for="game in activeGames">
+            <div class="right floated content">
+              <button type="button" class="ui teal button" v-on:click="join(game, $event)" v-if="game.gameState.state == 'WaitingForOpponent'">Join</button>
+              <button type="button" class="ui teal button">Watch</button>
+            </div>
+            <i class="large circle icon image"></i>
+            <div class="content">
+              <div class="header">
+                {{game.blackPlayerStatus.name}} [{{game.blackPlayerStatus.score}}] 
+                - 
+                {{game.whitePlayerStatus.name}} [{{game.whitePlayerStatus.score}}]
               </div>
             </div>
           </div>
@@ -39,12 +36,13 @@
           </div>
         </div>
       </div>
-      <div class="five wide column">
+
+      <div class="four wide grey column">
         <h3>Players</h3>
         <div class="ui middle aligned divided list">
           <div class="item" v-for="player in registeredPlayers">
             <div class="right floated content">
-              <button class="ui toggle button" :disabled="player.hasDeclined" v-on:click="invite(player,  $event)">Invite</button>
+              <button class="ui toggle teal button" :disabled="player.hasDeclined" v-on:click="invite(player, $event)">Invite</button>
             </div>
             <i class="large user icon"></i>
             <div class="content">
@@ -61,7 +59,7 @@
     <div class="ui active dimmer" v-if="invitationReceived">
       <div class="ui basic active modal">
         <div class="header">
-         You got a game invitation 
+          You got a game invitation 
         </div>
         <div class="content">
           <p>You have been invited to play a game with: <strong>{{inviter.name}}</strong></p>
@@ -147,8 +145,24 @@
       this.$store.dispatch('LOAD_PLAYERS')
     }
   }
-</script>
+  </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+
+  .gamearea-page {
+      margin-top: 80px;
+    }
+
+  .list.games .item {
+    padding: 20px 0;
+  }
+
+  .grey.column .content a.header {
+    color: white!important;
+  }
+
+  .ui.header {
+    margin-bottom: 40px;
+  }
 
 </style>
