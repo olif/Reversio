@@ -80,6 +80,14 @@ namespace Reversio.Server
             return BadRequest("Opponent not available");
         }
 
+        [HttpPost("invitationresponse")]
+        public IActionResult InvitationResponse([FromBody] GameInvitationResponseModel invitationResponse)
+        {
+            var player = GetPlayer();
+            _gameEngine.InvitationResponse(player, invitationResponse.Invitee, invitationResponse.AcceptChallange);
+            return Ok();
+        }
+
         private Player GetPlayer()
         {
             var playerName = User.Identity.Name;

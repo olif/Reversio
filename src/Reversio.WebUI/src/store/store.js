@@ -1,27 +1,20 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-/* import router from '../router' */
 import Api from './api'
 import SocketHandler from './socket'
+import States from './states'
+import Router from '../router.js'
 
 Vue.use(Vuex)
-
-const states = {
-  UNDEFINED: 'UNDEFINED',
-  WAITING_FOR_PLAYER: 'WAITING_FOR_PLAYER',
-  WAITING_ON_INVITATION_RESPONSE: 'WAITING_ON_INVITATION_RESPONSE',
-  RECEIVED_INVITATION: 'RECEIVED_INVITATION',
-  NEW_GAME_STARTED: 'NEW_GAME_STARTED',
-  PLAYING: 'PLAYING'
-}
 
 const store = new Vuex.Store({
   state: {
     signedInUser: null,
-    currentState: states.UNDEFINED,
-    invitee: null,
+    currentState: States.UNDEFINED,
+    inviter: null,
     activeGames: [],
     opponents: [],
+    declinedInvitations: [],
     activeGame: {
       gameId: '',
       lastValidMove: null,
@@ -37,22 +30,33 @@ const store = new Vuex.Store({
 
   actions: {
 
-    GAME_INVITATION_RECEIVED: function ({commit}, invitee) {
-      console.log(invitee)
-      commit('SET_STATE', states.RECEIVED_INVITATION)
-      commit('SET_INVITEE', invitee)
+    INVITATION_RESPONSE: function ({commit, state}, acceptChallange) {
+      return api.invitationResponse(state.inviter, acceptChallange).then(() => {
+        console.log('clearing inviter')
+        commit('CLEAR_INVITER')
+        commit('SET_STATE', States.UNDEFINED)
+      })
+    },
+
+    GAME_INVITATION_RECEIVED: function ({commit, state}, inviter) {
+      commit('SET_STATE', States.RECEIVED_INVITATION)
+      commit('SET_INVITER', inviter)
+    },
+
+    GAME_INVITATION_DECLINED: function ({commit}, response) {
+      commit('ADD_DECLINED_INVITATION', response)
     },
 
     INVITE_PLAYER: function ({commit}, opponent) {
       return api.invitePlayer({opponent: opponent})
-        .then(() => commit('SET_STATE', states.WAITING_ON_INVITATION_RESPONSE))
+        .then(() => commit('SET_STATE', States.WAITING_ON_INVITATION_RESPONSE))
     },
 
     JOIN_GAME: function ({commit}, game) {
       return api.joinGame(game)
         .then((response) => {
           commit('START_GAME', response.data)
-          commit('SET_STATE', states.PLAYING)
+          commit('SET_STATE', States.PLAYING)
         })
     },
 
@@ -126,11 +130,18 @@ const store = new Vuex.Store({
       })
     },
 
+    // Used when the game was started by the server
+    START_GAME: function ({commit}, game) {
+      commit('START_GAME', game.currentState)
+      commit('SET_STATE', States.PLAYING)
+      Router.push({ name: 'game', params: { id: game.gameId } })
+    },
+
     START_NEW_GAME: function ({commit, state}) {
       return new Promise((resolve, reject) => {
         api.createNewGame().then((game) => {
           commit('START_GAME', game.data)
-          commit('SET_STATE', states.PLAYING)
+          commit('SET_STATE', States.PLAYING)
           resolve(game.data)
         })
         .catch((error) => {
@@ -146,6 +157,14 @@ const store = new Vuex.Store({
 
   mutations: {
 
+    ADD_DECLINED_INVITATION: (state, declined) => {
+      state.declinedInvitations.push(declined)
+    },
+
+    CLEAR_INVITER: (state) => {
+      state.inviter = null
+    },
+
     SET_USER: (state, user) => {
       state.signedInUser = user
     },
@@ -158,8 +177,8 @@ const store = new Vuex.Store({
       state.activeGame = gameState
     },
 
-    SET_INVITEE: (state, invitee) => {
-      state.invitee = invitee
+    SET_INVITER: (state, inviter) => {
+      state.inviter = inviter
     },
 
     SET_PLAYERS: (state, players) => {
@@ -168,6 +187,7 @@ const store = new Vuex.Store({
 
     START_GAME: (state, gameStarted) => {
       console.log('game started')
+      console.log(gameStarted)
       state.activeGame = gameStarted
       if (gameStarted.blackPlayerStatus.name === state.signedInUser) {
         state.activeDisc = -1
@@ -228,18 +248,41 @@ const store = new Vuex.Store({
     },
 
     currentState: state => state,
-    
+
     opponent: state => {
-      console.log(state.currentState)
-      if (state.currentState === states.PLAYING) {
+      if (state.currentState === States.PLAYING) {
         if (state.signedInUser === state.activeGame.blackPlayerStatus.name) {
           return {name: state.activeGame.whitePlayerStatus.name}
         } else {
           return {name: state.activeGame.blackPlayerStatus.name}
         }
       }
+    },
+
+    opponents: state => {
+      let opponents = []
+      for (let opponent of state.opponents) {
+        let op = opponent
+        console.log('declined invitations')
+        console.log(state.declinedInvitations)
+        for (let dec of state.declinedInvitations) {
+          console.log('--------------')
+          console.log(opponent.name)
+          console.log(dec.invitee.name)
+          if (opponent.name === dec.invitee.name) {
+            console.log('has declined')
+            op.hasDeclined = true
+          } else {
+            op.hasDeclined = false
+          }
+        }
+
+        opponents.push(op)
+      }
+
+      return opponents
     }
-    
+
   }
 })
 

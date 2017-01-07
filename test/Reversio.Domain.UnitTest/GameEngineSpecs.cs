@@ -136,6 +136,8 @@ namespace Reversio.Domain.UnitTest
         public void An_invited_player_can_accept_the_invitation_which_starts_a_new_game()
         {
             var playerInvited = false;
+            var part1GotNewGameEvent = false;
+            var part2GotNewGameEvent = false;
             var newGameStarted = false;
             var part1 = new Player("4");
             var part2 = new Player("5");
@@ -144,10 +146,15 @@ namespace Reversio.Domain.UnitTest
             _sut.PlayerInvitedToNewGame += (sender, args) => playerInvited = true;
             _sut.GameStarted += (sender, participant, args) =>
             {
-                if (participant == part1 || participant == part2)
+                newGameStarted = true;
+                if (participant == part1)
                 {
-                    newGameStarted = true;
-                } 
+                    part1GotNewGameEvent = true;
+                }
+                if (participant == part2)
+                {
+                    part2GotNewGameEvent = true;
+                }
             };
             var isChallangeSent = _sut.TryInvitePlayerToGame(part1, part2);
 
@@ -156,6 +163,8 @@ namespace Reversio.Domain.UnitTest
             isChallangeSent.Should().BeTrue();
             playerInvited.Should().BeTrue();
             newGameStarted.Should().BeTrue();
+            part1GotNewGameEvent.Should().BeTrue();
+            part2GotNewGameEvent.Should().BeTrue();
         }
 
         [Fact]

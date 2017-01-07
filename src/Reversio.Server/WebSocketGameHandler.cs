@@ -66,7 +66,7 @@ namespace Reversio.Server
 
         private void OnGameInvitationDeclined(object sender, InvitationEventArgs e)
         {
-            var conn = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == e.Invitee.Name).Value;
+            var conn = _activeSessions.FirstOrDefault(x => x.Key.Identity.Name == e.Inviter.Name).Value;
             var msg = Message.InvitationDeclined(e);
             conn?.Send(msg.ToJson());
         }

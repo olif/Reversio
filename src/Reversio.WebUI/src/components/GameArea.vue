@@ -44,13 +44,13 @@
         <div class="ui middle aligned divided list">
           <div class="item" v-for="player in registeredPlayers">
             <div class="right floated content">
-              <button class="ui toggle button" v-on:click="invite(player,  $event)">Invite</button>
+              <button class="ui toggle button" :disabled="player.hasDeclined" v-on:click="invite(player,  $event)">Invite</button>
             </div>
             <i class="large user icon"></i>
             <div class="content">
               <a class="header">{{ player.name }}</a>
               <div class="description">
-                description
+                <span v-if="player.hasDeclined">Has declined invitation</span>
               </div>
             </div>
           </div>
@@ -64,10 +64,10 @@
          You got a game invitation 
         </div>
         <div class="content">
-          <p>You have been invited to play a game with: <strong>{{invitee.name}}</strong></p>
+          <p>You have been invited to play a game with: <strong>{{inviter.name}}</strong></p>
         </div>
         <div class="actions">
-          <div class="ui deny red basic inverted button">
+          <div class="ui deny red basic inverted button" v-on:click="declineInvitation()">
             <i class="remove icon"></i>
             No
           </div>
@@ -82,7 +82,6 @@
 </template>
 
 <script>
-  import $ from 'jquery'
   export default {
     data: function () {
       return {
@@ -90,8 +89,11 @@
       }
     },
     methods: {
-      test (e) {
-        console.log($('.ui.basic.modal'))
+      acceptInvitation () {
+        this.$store.dispatch('INVITATION_RESPONSE', true)
+      },
+      declineInvitation () {
+        this.$store.dispatch('INVITATION_RESPONSE', false)
       },
       waitForPlayer (e) {
         console.log('waiting for player')
@@ -120,7 +122,9 @@
         return this.$store.state.activeGames
       },
       registeredPlayers: function () {
-        return this.$store.state.opponents
+        let opponents = this.$store.getters.opponents
+        console.log(opponents)
+        return opponents
       },
       invitationReceived: function () {
         console.log('checking invitation')
@@ -134,8 +138,8 @@
         console.log(this.$store.state.currentState)
         return this.$store.state.currentState === 'WAITING_FOR_PLAYER'
       },
-      invitee: function () {
-        return this.$store.state.invitee
+      inviter: function () {
+        return this.$store.state.inviter
       }
     },
     beforeMount () {

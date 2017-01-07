@@ -16,6 +16,14 @@ export default class Api {
     }
   }
 
+  invitationResponse (invitee, acceptChallange) {
+    let obj = {
+      invitee: invitee,
+      acceptChallange: acceptChallange
+    }
+    return axios.post('invitationresponse', obj)
+  }
+
   createNewGame () {
     return axios.post('games/new')
   }

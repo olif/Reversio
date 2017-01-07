@@ -19,7 +19,7 @@ export default class GameSocketHandler {
     switch (msg.messageType) {
 
       case 'reversio.event.gameStarted':
-        console.log(msg.payload)
+        console.log('game started from server')
         this.store.dispatch('START_GAME', msg.payload)
         break
 
@@ -28,35 +28,12 @@ export default class GameSocketHandler {
         break
 
       case 'reversio.event.gameInvitation':
-        this.store.dispatch('GAME_INVITATION_RECEIVED', msg.payload.invitee)
+        this.store.dispatch('GAME_INVITATION_RECEIVED', msg.payload.inviter)
         break
 
       case 'reversio.event.gameInvitationDeclined':
-        this.store.dispatch('GAME_INVITATION_DECLINED')
+        this.store.dispatch('GAME_INVITATION_DECLINED', msg.payload)
         break
     }
   }
-
-  /* makeMove (gameId, user, position) {
-    let msg = {
-      messageType: 'reversio.event.move',
-      payload: {
-        gameId: gameId,
-        bystander: user,
-        position: position
-      }
-    }
-
-    this.socket.send(JSON.stringify(msg))
-  }
-
-  waitForOpponent () {
-    let msg = {
-      messageType: 'reversio.event.startGameWithRandomPlayer',
-      payload: {
-        name: 'this.userIdtest'
-      }
-    }
-    this.socket.send(JSON.stringify(msg))
-  } */
 }
