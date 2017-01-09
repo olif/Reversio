@@ -50,7 +50,6 @@ namespace Reversio.Domain
             _positions = positions;
         }
 
-
         public int[,] CurrentState {
             get
             {
@@ -97,6 +96,20 @@ namespace Reversio.Domain
             }
 
             return false;
+        }
+
+        public void RemoveDiscForColor(DiscColor disc)
+        {
+            for (var i = 0; i < EdgeSize; i++)
+            {
+                for (var j = 0; j < EdgeSize; j++)
+                {
+                    if (_positions[i, j] == disc.Color)
+                    {
+                        _positions[i, j] = 0;
+                    }
+                }
+            }
         }
 
         private void UpdateState(Move move, IList<Position> piecesToFlip)

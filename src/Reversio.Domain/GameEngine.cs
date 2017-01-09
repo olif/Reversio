@@ -16,9 +16,10 @@ namespace Reversio.Domain
         private readonly IDictionary<string, Player> _registeredPlayers = new ConcurrentDictionary<string, Player>();
         private readonly IList<Tuple<Player, Player>> _invitations = new List<Tuple<Player, Player>>();
 
+        public event GameInvitationHandler GameInvitationDeclined;
         public event GameStateChangedHandler GameStateChanged;
         public event GameInvitationHandler PlayerInvitedToNewGame;
-        public event GameInvitationHandler GameInvitationDeclined;
+        public event PlayerLeftGameHandler PlayerLeftGame;
 
         public static GameEngine Instance = new GameEngine();
         
@@ -29,9 +30,100 @@ namespace Reversio.Domain
         {
         }
 
-        public IReadOnlyList<GameStatus> ActiveGames => _activeGames.Values.Select(x => x.CurrentState).ToList().AsReadOnly();
+        public IReadOnlyList<GameStatus> ActiveGames => _activeGames.Values.Select(x => x.CurrentStatus).ToList().AsReadOnly();
 
         public IReadOnlyList<Player> RegisteredPlayers => _registeredPlayers.Values.ToList().AsReadOnly();
+
+        public GameStatus CreateNewGame(Player player)
+        {
+            AssertPlayerIsRegistered(player);
+
+            var blackPlayer = new BlackPlayer(player.Name);
+
+            var game = new Game(blackPlayer);
+            game.GameStateChanged += (e, observerId, args) =>
+            {
+                OnGameChanged(observerId, args);
+            };
+            _activeGames.Add(game.GameId, game);
+            return game.CurrentStatus;
+        }
+
+
+        public void InvitationResponse(Player invitee, Player inviter, bool challangeAccepted)
+        {
+            if (challangeAccepted)
+            {
+                StartNewGame(invitee, inviter);
+            }
+            else
+            {
+                OnGameInvitationDeclined(new ChallangeDeclinedEventArgs(inviter, invitee));
+            }
+
+            _invitations.Remove(new Tuple<Player, Player>(inviter, invitee));
+        }
+
+        public GameStatus JoinGame(Guid gameId, Player player)
+        {
+            AssertPlayerIsRegistered(player);
+
+            var whitePlayer = new WhitePlayer(player.Name);
+
+            var game = _activeGames[gameId];
+            game.JoinOpponent(whitePlayer);
+            return game.CurrentStatus;
+        }
+
+        public IReadOnlyList<Position> MakeMove(Guid gameId, Player player, Position position)
+        {
+            AssertPlayerIsRegistered(player);
+
+            var game = _activeGames[gameId];
+            return game.PlayerMakesMove(player, position);
+        }
+
+        public void ObserveGame(Guid gameId, Player player)
+        {
+            AssertPlayerIsRegistered(player);
+
+            var game = _activeGames[gameId];
+            game.JoinObserver(player);
+        }
+
+        public void PutPlayerInQueue(Player player)
+        {
+            AssertPlayerIsRegistered(player);
+
+            lock (_waitingToPlayLock)
+            {
+                if (_waitingPlayer != null)
+                {
+                    StartNewGame(_waitingPlayer, player);
+                    _waitingPlayer = null;
+                }
+                else
+                {
+                    _waitingPlayer = player;
+                }
+            }
+        }
+
+        public void RegisterPlayer(Player player)
+        {
+            if (!_registeredPlayers.ContainsKey(player.Name))
+            {
+                _registeredPlayers.Add(player.Name, player);
+            }
+        }
+
+        public void SignoutPlayer(Player player)
+        {
+            _registeredPlayers.Remove(player.Name);
+            
+
+           throw new NotImplementedException();
+        }
 
         public bool TryInvitePlayerToGame(Player inviter, Player opponent)
         {
@@ -60,46 +152,14 @@ namespace Reversio.Domain
             return true;
         }
 
-        public void InvitationResponse(Player invitee, Player inviter, bool challangeAccepted)
+        internal GameStatus AddGame(Game game)
         {
-            if (challangeAccepted)
+            game.GameStateChanged += (e, observerId, args) =>
             {
-                StartNewGame(invitee, inviter);
-            }
-            else
-            {
-                OnGameInvitationDeclined(new ChallangeDeclinedEventArgs(inviter, invitee));
-            }
-
-            _invitations.Remove(new Tuple<Player, Player>(inviter, invitee));
-        }
-
-        private void StartNewGame(Player invitee, Player inviter)
-        {
-            var blackPlayer = new BlackPlayer(inviter.Name);
-            var whitePlayer = new WhitePlayer(invitee.Name);
-            var game = CreateNewGame(blackPlayer);
-            var state = JoinGame(game.GameId, whitePlayer);
-            OnGameStarted(blackPlayer, state);
-            OnGameStarted(whitePlayer, state);
-        }
-
-        public void PutPlayerInQueue(Player player)
-        {
-            AssertPlayerIsRegistered(player);
-
-            lock (_waitingToPlayLock)
-            {
-                if (_waitingPlayer != null)
-                {
-                    StartNewGame(_waitingPlayer, player);
-                    _waitingPlayer = null;
-                }
-                else
-                {
-                    _waitingPlayer = player;
-                }
-            }
+                OnGameChanged(observerId, args);
+            };
+            _activeGames.Add(game.GameId, game);
+            return game.CurrentStatus;
         }
 
         private void AssertPlayerIsRegistered(Player player)
@@ -108,39 +168,6 @@ namespace Reversio.Domain
             {
                 throw new PlayerNotRegisteredException(player);
             }
-        }
-
-        public void RegisterPlayer(Player player)
-        {
-            if (!_registeredPlayers.ContainsKey(player.Name))
-            {
-                _registeredPlayers.Add(player.Name, player);
-            }
-        }
-
-        public GameStatus CreateNewGame(Player player)
-        {
-            AssertPlayerIsRegistered(player);
-
-            var blackPlayer = new BlackPlayer(player.Name);
-
-            var game = new Game(blackPlayer);
-            game.GameStateChanged += (e, observerId, args) =>
-            {
-                OnGameChanged(observerId, args);
-            };
-            _activeGames.Add(game.GameId, game);
-            return game.CurrentState;
-        }
-
-        internal GameStatus AddGame(Game game)
-        {
-            game.GameStateChanged += (e, observerId, args) =>
-            {
-                OnGameChanged(observerId, args);
-            };
-            _activeGames.Add(game.GameId, game);
-            return game.CurrentState;
         }
 
         private void OnGameChanged(Player observerId, GameStateChangedEventArgs args)
@@ -153,46 +180,33 @@ namespace Reversio.Domain
             GameStateChanged?.Invoke(this, observerId, args);
         }
 
-        public GameStatus JoinGame(Guid gameId, Player player)
-        {
-            AssertPlayerIsRegistered(player);
-
-            var whitePlayer = new WhitePlayer(player.Name);
-
-            var game = _activeGames[gameId];
-            game.JoinOpponent(whitePlayer);
-            return game.CurrentState;
-        }
-
-        protected virtual void OnGameStarted(ActivePlayer player, GameStatus currentState)
-        {
-            GameStarted?.Invoke(this, player, new GameStartedEventArgs(currentState, player));
-        }
-
-        public IReadOnlyList<Position> MakeMove(Guid gameId, Player player, Position position)
-        {
-            AssertPlayerIsRegistered(player);
-
-            var game = _activeGames[gameId];
-            return game.PlayerMakesMove(player, position);
-        }
-
-        protected virtual void OnPlayerInvitedToNewGame(InvitationEventArgs e)
-        {
-            PlayerInvitedToNewGame?.Invoke(this, e);
-        }
-
-        protected virtual void OnGameInvitationDeclined(InvitationEventArgs e)
+        private void OnGameInvitationDeclined(InvitationEventArgs e)
         {
             GameInvitationDeclined?.Invoke(this, e);
         }
 
-        public void ObserveGame(Guid gameId, Player player)
+        private void OnGameStarted(ActivePlayer player, GameStatus currentState)
         {
-            AssertPlayerIsRegistered(player);
+            GameStarted?.Invoke(this, player, new GameStartedEventArgs(currentState, player));
+        }
 
-            var game = _activeGames[gameId];
-            game.JoinObserver(player);
+        private void OnPlayerInvitedToNewGame(InvitationEventArgs e)
+        {
+            PlayerInvitedToNewGame?.Invoke(this, e);
+        }
+        private void OnPlayerLeftGame(PlayerLeftGameEventArgs e)
+        {
+            PlayerLeftGame?.Invoke(this, e);
+        }
+        
+        private void StartNewGame(Player invitee, Player inviter)
+        {
+            var blackPlayer = new BlackPlayer(inviter.Name);
+            var whitePlayer = new WhitePlayer(invitee.Name);
+            var game = CreateNewGame(blackPlayer);
+            var state = JoinGame(game.GameId, whitePlayer);
+            OnGameStarted(blackPlayer, state);
+            OnGameStarted(whitePlayer, state);
         }
     }
 }

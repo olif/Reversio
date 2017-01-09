@@ -29,6 +29,8 @@ namespace Reversio.Server
         protected override void OnConnectionClosed(IWebSocketConnection conn)
         {
             var entry = _activeSessions.FirstOrDefault(x => x.Value.Id == conn.Id);
+            var player = new Player(entry.Key.Identity.Name);
+            _gameEngine.SignoutPlayer(player);
             _activeSessions.Remove(entry.Key);
         }
 

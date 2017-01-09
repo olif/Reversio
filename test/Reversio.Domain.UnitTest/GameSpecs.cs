@@ -132,5 +132,45 @@ namespace Reversio.Domain.UnitTest
 
             gameState.Should().Be(GameState.Finished);
         }
+
+        [Fact]
+        public void Disqualify_Removes_All_Discs_For_The_Disqualified_Player_And_Lets_The_Other_Player_Win()
+        {
+            GameState gameState = null;
+            GameStatus gameStatus = null;
+            var positions = new[,]
+            {
+
+                {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', 'X'},
+
+                {' ', 'O', 'O', 'O', 'O', 'O', 'O', 'X'},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+            };
+
+            var board = new Board(positions.Translate());
+            var game = new Game(_blackPlayer, board);
+            game.GameStateChanged += (o, observerId, e) =>
+            {
+                gameState = e.CurrentState.GameState;
+                gameStatus = e.CurrentState;
+            };
+            game.JoinOpponent(_whitePlayer);
+
+            game.DisqualifyPlayer(_blackPlayer);
+            gameState.Should().Be(GameState.FinishedByWalkover);
+            gameStatus.BlackPlayerStatus.Score.Should().Be(0);
+            gameStatus.WhitePlayerStatus.Score.Should().Be(6);
+        }
     }
 }

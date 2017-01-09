@@ -10,6 +10,7 @@ namespace Reversio.Domain
         public static GameState WaitingForOpponent = new GameState("WaitingForOpponent");
         public static GameState Playing = new GameState("Playing");
         public static GameState Finished = new GameState("Finished");
+        public static GameState FinishedByWalkover = new GameState("FinishedByWalkover");
 
         public string State { get; }
 

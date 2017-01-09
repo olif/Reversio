@@ -111,40 +111,33 @@ namespace Reversio.Domain.UnitTest
             hasMoves.Should().BeFalse();
         }
 
-        //[Fact]
-        //public void Can_Make_Multiple_Moves_Of_Same_Color_If_Other_Color_Cannot_Move()
-        //{
-        //    var positions = new char[8, 8]
-        //    {
+        [Fact]
+        public void RemoveDiscsForColor_Removes_All_Discs_For_The_Specified_Color()
+        {
+            var positions = new char[8, 8]
+            {
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X'},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+                {' ', ' ', 'X', 'X', 'X', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', 'X'},
+                {' ', ' ', 'X', 'O', 'X', ' ', ' ', ' '},
 
-        //        {'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'},
+                {' ', ' ', 'X', 'X', 'X', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', 'O', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            };
 
-        //        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-        //    };
-
-        //    var board = new Board(positions.Translate());
-        //    var move1 = new Move(5, 0, Disc.Dark);
-        //    var move2 = new Move(5, 2, Disc.Dark);
-
-        //    var result1 = board.TryDoMove(move1);
-        //    var result2 = board.TryDoMove(move2);
-
-        //    Debug.WriteLine(board);
-        //    result1.Should().BeTrue();
-        //    result2.Should().BeTrue();
-        //}
+            var board = new Board(positions.Translate());
+            board.RemoveDiscForColor(DiscColor.Black);
+            board.CurrentState.Should().NotContain(DiscColor.Black.Color);
+            board.CurrentState.Should().Contain(DiscColor.White.Color);
+        }
 
         [Fact]
         public void TryDoMove_Sets_The_Board_In_Correct_State()

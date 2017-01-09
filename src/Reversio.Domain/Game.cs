@@ -37,7 +37,7 @@ namespace Reversio.Domain
             _observers = new List<Player> {player};
         }
 
-        public GameStatus CurrentState => new GameStatus(GameId, 
+        public GameStatus CurrentStatus => new GameStatus(GameId, 
             GameState,
             Board, 
             _discOfNextMove, 
@@ -65,6 +65,23 @@ namespace Reversio.Domain
             _observers.Add(player);
             GameState = GameState.Playing;
             OnPlayerJoined();
+        }
+
+        /// <summary>
+        /// If a player leaves a game before it is finished, then the 
+        /// player should be disqualifie
+        /// </summary>
+        /// <param name="player">The player to disqualify</param>
+        public void DisqualifyPlayer(Player player)
+        {
+            if (GameState == GameState.Playing)
+            {
+                var activePlayer = GetActivePlayer(player);
+                _observers.Remove(activePlayer);
+                Board.RemoveDiscForColor(activePlayer.Disc);
+                GameState = GameState.FinishedByWalkover;
+                OnGameStateChanged();
+            }
         }
 
         public void JoinObserver(Player observer)
@@ -134,7 +151,7 @@ namespace Reversio.Domain
         {
             foreach (var participant in _observers)
             {
-                GameStateChanged?.Invoke(this, participant, new GameStateChangedEventArgs(CurrentState));
+                GameStateChanged?.Invoke(this, participant, new GameStateChangedEventArgs(CurrentStatus));
             }
         }
     }
